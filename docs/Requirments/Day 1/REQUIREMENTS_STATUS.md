@@ -26,8 +26,8 @@
 | 4A | step 4A.md | SUPERSEDED | Original authentication requirements |
 | 4B | step 4B.md | CURRENT/NORMATIVE | Revised authentication with MFA/recovery - replaces 4A |
 | 5 | step 5.md | APPROVED | Doctor/Admin requirements - locked |
-| 6 | step 6.md | SUPERSEDED | Original patient requirements |
-| 6B | step 6B.md | CURRENT/NORMATIVE | Patient requirements with gender/language additions - replaces step 6 |
+| 6 | step 6.md | APPROVED | Patient requirements (original prompt) - locked |
+| 6B | step 6B.md | APPROVED | Patient requirements continuation with gender/language/transfer decisions - locked |
 | 7 | step 7.md | APPROVED | Medication requirements - locked |
 | 8 | step 8.md | APPROVED | Medication scheduling requirements - locked |
 | 9 | step 9.md | APPROVED | Reminder requirements - locked |
@@ -61,7 +61,7 @@ Implementation must use the CURRENT/NORMATIVE or APPROVED versions.
 The following A/B version pairs have been resolved:
 
 - **Step 4**: 4B is CURRENT/NORMATIVE (replaces 4A)
-- **Step 6**: 6B is CURRENT/NORMATIVE (replaces step 6)
+- **Step 6**: Both 6 and 6B are APPROVED as conversation flow; 6B adds gender, language, transfer decisions
 - **Step 10**: 10B is CURRENT/NORMATIVE (replaces 10A)
 - **Step 14**: 14B is CURRENT/NORMATIVE (replaces 14A)
 - **Step 17**: 17B is CURRENT/NORMATIVE (replaces 17A)

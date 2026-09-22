@@ -114,9 +114,19 @@ System timestamps shall be stored consistently in UTC, while user-facing times s
 
 ## 18.6 Scalability
 
-### NFR-021 — Initial Phase 1 Scale
+### NFR-021 — Phase 1 Scale Targets
 
-The architecture shall support the expected Phase 1 workload without requiring a fundamental architectural redesign.
+The architecture shall support the Phase 1 scale targets without requiring a fundamental architectural redesign.
+
+**Approved Phase 1 Scale Targets:**
+- Up to 1,500 patients
+- Up to 100 doctors  
+- Up to 3 Admins
+- Design target: approximately 4,500 reminder occurrences per day
+- Capacity target: at least 1,000 reminder occurrences per hour
+- At least 100 active concurrent users
+
+These are design targets for architecture validation, not predictions of actual usage.
 
 ### NFR-022 — Horizontal Worker Scaling
 
@@ -234,9 +244,14 @@ Logs shall never intentionally contain passwords, reset tokens, API secrets, pro
 
 Production database data shall be backed up using an appropriate backup mechanism provided by the selected infrastructure.
 
-### NFR-047 — Recovery Planning
+### NFR-047 — Recovery Targets
 
-The deployment shall have a documented procedure for restoring critical application data from backups.
+The deployment shall have documented recovery procedures meeting the following targets:
+
+- **RPO (Recovery Point Objective)**: ≤ 15 minutes
+- **RTO (Recovery Time Objective)**: ≤ 1 hour
+
+These targets shall be verified against actual deployment infrastructure capabilities before production launch.
 
 ### NFR-048 — Backup Verification
 
@@ -302,23 +317,35 @@ Role and patient-access restrictions shall be tested at the backend/API level.
 
 ## 18.13 Deployment and Operations
 
-### NFR-061 — Reproducible Deployment
+### NFR-061 — Reproducible Development Environment
+
+The application shall provide a reproducible containerized development environment using Docker.
+
+This ensures consistent development setup, dependencies, and build process across development team members.
+
+### NFR-062 — Reproducible Deployment
 
 The application shall be deployable using documented and repeatable configuration.
 
-### NFR-062 — Environment Variables and Secrets
+### NFR-063 — Environment Variables and Secrets
 
 Environment-specific secrets and configuration shall be managed through the deployment platform's secure configuration mechanism rather than source code.
 
-### NFR-063 — Health Monitoring
+### NFR-064 — Docker Configuration
+
+Docker container configuration shall be appropriate for backend/application services and tested for compatibility with the selected hosting architecture.
+
+Current approved architecture: Frontend (Vercel), Backend (Render), Database (Managed PostgreSQL), Redis (Managed Redis).
+
+### NFR-065 — Health Monitoring
 
 Backend services and critical background processing shall expose sufficient health information for operational monitoring.
 
-### NFR-064 — Graceful Shutdown
+### NFR-066 — Graceful Shutdown
 
 Application workers shall handle shutdown in a way that minimizes interrupted or lost processing.
 
-### NFR-065 — Deployment Safety
+### NFR-067 — Deployment Safety
 
 Application deployments shall minimize the risk of corrupting or losing scheduled reminder and notification processing.
 
@@ -326,15 +353,15 @@ Application deployments shall minimize the risk of corrupting or losing schedule
 
 ## 18.14 Compatibility
 
-### NFR-066 — Modern Web Browsers
+### NFR-068 — Modern Web Browsers
 
 The Doctor/Admin web application shall support current commonly used modern browsers.
 
-### NFR-067 — Responsive Interface
+### NFR-069 — Responsive Interface
 
 The web interface should remain usable on common desktop, tablet, and mobile screen sizes relevant to Phase 1 users.
 
-### NFR-068 — API Compatibility
+### NFR-070 — API Compatibility
 
 Internal API contracts shall be versioned or managed in a way that prevents uncontrolled breaking changes between frontend and backend.
 
@@ -342,7 +369,7 @@ Internal API contracts shall be versioned or managed in a way that prevents unco
 
 ## 18.15 Usability
 
-### NFR-069 — Clear Status Representation
+### NFR-071 — Clear Status Representation
 
 The interface shall clearly distinguish:
 
@@ -352,19 +379,19 @@ The interface shall clearly distinguish:
 * notification failure
 * pending/escalation states
 
-### NFR-070 — Actionable Errors
+### NFR-072 — Actionable Errors
 
 User-facing errors shall explain what went wrong and, where appropriate, what action the user can take.
 
-### NFR-071 — Confirmation of Critical Actions
+### NFR-073 — Confirmation of Critical Actions
 
 Actions that can materially affect patient reminders, medications, schedules, access, or configuration should provide appropriate confirmation.
 
-### NFR-072 — Localization Consistency
+### NFR-074 — Localization Consistency
 
 Supported user-facing languages shall use the centralized localization mechanism consistently.
 
-### NFR-073 — Accessibility
+### NFR-075 — Accessibility
 
 The web interface should follow reasonable accessibility practices, including readable text, keyboard-accessible controls, clear labels, and appropriate semantic UI structure.
 
@@ -372,19 +399,19 @@ The web interface should follow reasonable accessibility practices, including re
 
 ## 18.16 Configuration and Change Safety
 
-### NFR-074 — Controlled Configuration
+### NFR-076 — Controlled Configuration
 
 Configuration changes shall be validated before becoming active.
 
-### NFR-075 — Configuration Auditability
+### NFR-077 — Configuration Auditability
 
 Significant configuration changes shall be traceable to the user or system actor that made them.
 
-### NFR-076 — Future-Only Configuration Changes
+### NFR-078 — Future-Only Configuration Changes
 
 Changes to reminder/escalation configuration shall not silently rewrite historical reminder or adherence outcomes.
 
-### NFR-077 — Safe Defaults
+### NFR-079 — Safe Defaults
 
 The system shall provide validated default configuration sufficient to operate safely when an administrator has not customized optional settings.
 
@@ -392,19 +419,19 @@ The system shall provide validated default configuration sufficient to operate s
 
 ## 18.17 Operational Transparency
 
-### NFR-078 — Distinguish Business and Technical Failure
+### NFR-080 — Distinguish Business and Technical Failure
 
 The system shall distinguish patient adherence outcomes from technical notification/provider failures.
 
-### NFR-079 — Provider Status Mapping
+### NFR-081 — Provider Status Mapping
 
 External provider statuses shall be mapped into a consistent internal status model.
 
-### NFR-080 — Traceability
+### NFR-082 — Traceability
 
 A reminder occurrence shall be traceable through its notification attempts, patient responses, adherence outcome, and relevant audit events.
 
-### NFR-081 — No Silent Failure
+### NFR-083 — No Silent Failure
 
 Critical failures affecting reminder creation, notification processing, adherence processing, or data persistence shall be detectable and shall not silently disappear.
 
