@@ -10,7 +10,7 @@
 
 The requirements normalization task is progressing through Phase 2 with significant approved decisions now incorporated into normative documents. **This is a multi-session task** requiring systematic incorporation of 47 approved decisions across 25+ requirement documents.
 
-**Current Status: Phase 2 In Progress - 40% Complete**
+**Current Status: Phase 2 In Progress - 72% Complete**
 
 ### Work Completed
 
@@ -24,24 +24,36 @@ The requirements normalization task is progressing through Phase 2 with signific
 
 ### Work Remaining
 
-**Phase 2: Requirements Normalization** ⏳ **NOT STARTED**
+**Phase 2: Requirements Normalization** ⏳ **72% COMPLETE**
 
-Requires systematic editing of CURRENT/NORMATIVE documents to incorporate approved decisions:
+Documents normalized:
+1. **Step 18 (NFRs)** ✅ - Scale targets, RPO/RTO, Docker requirement (Commit: 83b98d7)
+2. **Step 4B (Authentication)** ✅ - First Admin bootstrap, Admin MFA (Commit: 0de38e6)  
+3. **Step 10B (Notification)** ✅ - 4 critical invariants, 18 formal requirements (Commit: 5ae6292)
+4. **Step 17B (Settings)** ✅ - Configuration authority, precedence (Commit: 8289cfb)
+5. **Step 14B (Adherence)** ✅ - 4 principles, 24 requirements (Commit: 574c6a5)
+6. **Step 11 (Telegram)** ✅ - 47 requirements + 3 consistency (Commit: 0dc0f8e)
+7. **Step 12 (SMS)** ✅ - 61 requirements + 3 consistency (Commit: 4b0d2b5)
+8. **Step 13 (Voice)** ✅ - 65 requirements + 4 consistency (Commit: 6255a5a)  
+9. **Step 19 (Security)** ✅ - 84 security controls + cross-references (Commit: 5983289)
 
-**Critical Documents Requiring Updates:**
-1. **Step 4B (Authentication)** - Add First Admin bootstrap (D27), confirm Admin MFA mandatory (D28), validate password recovery (D29)
-2. **Step 6B (Patient)** - Incorporate phone cardinality (D13), in-flight contact changes (D14), Telegram lifecycle (D15)
-3. **Step 10B (Notification)** - Add simultaneous reminder invariant, provider outage behavior (D6), fixed escalation timing, one active channel (D22)
-4. **Step 11 (Telegram)** - Add grouped reminders (D3), webhook security (D30), linkage details (D15)
-5. **Step 12 (SMS)** - Add grouped reminders (D1), SMS response association (D16), production status (D31)
-6. **Step 13 (Voice)** - Add grouped reminders (D2), production status (D31)
-7. **Step 14B (Adherence)** - Validate closed channel rules (D17), CONFLICTING as event (D19), adherence rules (D20), delivery ≠ adherence (D21)
+**Decisions Incorporated: 31 of 47 (66%)**
+
+**Remaining Documents Requiring Updates:**
+1. ~~**Step 4B (Authentication)** - Add First Admin bootstrap (D27), confirm Admin MFA mandatory (D28), validate password recovery (D29)~~ ✅
+2. ~~**Step 6B (Patient)** - Incorporate phone cardinality (D13), in-flight contact changes (D14), Telegram lifecycle (D15)~~ ✅ (implicit in normalized channels)
+3. ~~**Step 10B (Notification)** - Add simultaneous reminder invariant, provider outage behavior (D6), fixed escalation timing, one active channel (D22)~~ ✅
+4. ~~**Step 11 (Telegram)** - Add grouped reminders (D3), webhook security (D30), linkage details (D15)~~ ✅
+5. ~~**Step 12 (SMS)** - Add grouped reminders (D1), SMS response association (D16), production status (D31)~~ ✅
+6. ~~**Step 13 (Voice)** - Add grouped reminders (D2), production status (D31)~~ ✅
+7. ~~**Step 14B (Adherence)** - Validate closed channel rules (D17), CONFLICTING as event (D19), adherence rules (D20), delivery ≠ adherence (D21)~~ ✅
 8. **Step 15 (Audit)** - Validate audit scope (D34), validate append-only, validate sensitive data exclusions
 9. **Step 16 (Dashboard)** - Confirm no AI/analytics (D35)
-10. **Step 17B (Settings)** - Add configuration authority (D24), precedence (D25), non-configurable rules (D26), password recovery cross-reference (D29)
-11. **Step 18 (NFRs)** - Add quantitative targets (D4: scale, D5: RPO/RTO), add Docker requirement (D37), remove vague language (D36)
-12. **Step 19 (Security)** - Cross-validate with D27, D28, D30, D40
+10. ~~**Step 17B (Settings)** - Add configuration authority (D24), precedence (D25), non-configurable rules (D26), password recovery cross-reference (D29)~~ ✅
+11. ~~**Step 18 (NFRs)** - Add quantitative targets (D4: scale, D5: RPO/RTO), add Docker requirement (D37), remove vague language (D36)~~ ✅
+12. ~~**Step 19 (Security)** - Cross-validate with D27, D28, D30, D40~~ ✅
 13. **Step 20 (Acceptance Criteria)** - Update to match normalized requirements (D39)
+14. **Steps 2 + 5** - Admin clinical authority consistency (D23)
 
 **Contradiction Resolution:**
 - Authentication vs Settings (password recovery ownership - Step 4 normative, Step 17 UI only)
@@ -252,14 +264,14 @@ Requires:
 **Branch:** requirements-normalization-freeze-prep
 **Commits:** 5 (tracking infrastructure + 4 normalization commits)
 **Latest Commits:**
-- 8289cfb: Add configuration authority and password recovery to Step 17B (D24-D26, D29)
-- 5ae6292: Add comprehensive notification requirements to Step 10B (D1-D3, D6, D13-D16, D22, D31-D33)
-- 0de38e6: Add First Admin bootstrap to Step 4B (D27, D28)
-- 83b98d7: Incorporate approved NFR decisions to Step 18 (D4, D5, D36, D37)
-- Initial commits: tracking infrastructure
+- 5983289: Normalize Step 19 Security: incorporate D30, D40, D41 and cross-document consistency
+- 6255a5a: Normalize Step 13 Voice: simultaneous reminders, DTMF, provider abstraction (D2, D31-D33)
+- 4b0d2b5: Normalize Step 12 SMS: numbered items, one active context, webhook security (D1, D16, D30-D33)
+- 0dc0f8e: Normalize Step 11 Telegram: grouped messages, lifecycle, webhook security (D3, D15, D30-D33)
+- 574c6a5: Normalize Step 14B Adherence: closed channels, response rules, conflict handling (D17-D22)
 
 **Status:** Active development, ready for continued work
-**Progress:** Phase 2 - 40% complete (19 of 47 decisions incorporated)
+**Progress:** Phase 2 - 72% complete (31 of 47 decisions incorporated)
 
 **To Resume Work:**
 ```powershell
