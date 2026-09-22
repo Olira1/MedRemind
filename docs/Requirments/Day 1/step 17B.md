@@ -124,3 +124,111 @@ We should explicitly define these as two different processes:
 I recommend adding these requirements to **Step 17 — Settings**, and also cross-referencing them from **Authentication/Security requirements**.
 
 If you agree with both changes, I'll treat them as the approved direction and we can **lock Step 17 and proceed to Step 18 — Non-Functional Requirements**.
+
+
+---
+
+## Approved Settings & Configuration Requirements for Phase 1
+
+### Configuration Authority and Precedence
+
+**SETTINGS-REQ-001 — Admin System Boundaries**
+
+Admin SHALL control:
+- System-wide available notification channels (Telegram, SMS, Voice)
+- System default escalation policies
+- Global escalation policy boundaries and safety limits
+- Allowable configuration ranges (e.g., escalation intervals must be between 1-60 minutes)
+- Provider configuration and system-wide operational settings
+
+**SETTINGS-REQ-002 — Doctor Patient-Level Configuration**
+
+Doctors SHALL be able to configure reminder and escalation behavior for patients assigned to them, within the boundaries established by Admin.
+
+Doctor configuration capabilities SHALL include:
+- Reminder escalation policy for assigned patients
+- Escalation timing within Admin-defined safety/technical boundaries
+- Appropriate escalation sequence using channels enabled by Admin
+- Patient-specific reminder configuration
+
+Doctors SHALL NOT be able to:
+- Configure patients not assigned to them
+- Exceed Admin-defined safety boundaries
+- Configure system-wide defaults
+- Modify another Doctor's patient settings
+
+**SETTINGS-REQ-003 — Configuration Precedence**
+
+The system SHALL enforce configuration precedence as follows:
+
+1. **Admin boundaries** (outermost constraint)
+2. **Doctor patient configuration** (within Admin boundaries)
+3. **Schedule-specific configuration** (refinements within Doctor config)
+4. **Patient communication availability** (hard constraint - cannot send through unavailable channel)
+
+Patient communication availability (valid phone, linked Telegram) acts as a hard constraint that overrides configured preferences when a channel is unavailable.
+
+**SETTINGS-REQ-004 — Configuration Change Auditability**
+
+Significant configuration changes SHALL be audited, including:
+- Admin boundary changes
+- Doctor patient-level configuration changes
+- Escalation policy modifications
+- Channel availability changes
+- Provider configuration changes
+
+**SETTINGS-REQ-005 — Non-Configurable System Invariants**
+
+The following system rules SHALL NOT be configurable through normal settings interfaces, as they are fundamental business rules:
+
+- `1 = Taken, 2 = Not Taken` (SMS and Voice response codes)
+- `NO_RESPONSE != NOT_TAKEN` (adherence distinction)
+- Closed channels cannot change adherence
+- Delivery ≠ adherence
+- Audit records are append-only for ordinary users
+- Doctor access limited to authorized patients
+- Admin/Doctor role boundaries enforced server-side
+- Communication grouping does not merge reminder/adherence records
+
+These are business logic rules, not ordinary configuration settings.
+
+### Password Recovery Cross-Reference
+
+**SETTINGS-REQ-006 — Password Recovery Ownership**
+
+Password recovery requirements are normatively defined in **Step 4 — Authentication Requirements, sections 4.10-4.12**.
+
+The Settings interface MAY provide UI entry points for password recovery actions (e.g., "Forgot Password" link), but SHALL NOT redefine the authentication/security requirements established in Step 4.
+
+For complete password recovery behavior, including:
+- Email-based password reset
+- Reset token properties
+- Rate limiting
+- Account enumeration protection
+- Lost email recovery
+- Admin account recovery
+- Security properties
+
+Refer to Step 4, requirements AUTH-022 through AUTH-030.
+
+**SETTINGS-REQ-007 — Settings Security**
+
+Settings changes that affect reminder delivery, escalation, or patient safety SHALL:
+- Require appropriate authentication and authorization
+- Be validated before becoming active
+- Not silently rewrite historical reminder or adherence outcomes
+- Be auditable
+- Follow the principle of least privilege
+
+---
+
+## Requirement Ownership and Cross-References
+
+These settings requirements work in conjunction with:
+- **Step 2**: Role definitions (Admin, Doctor)
+- **Step 4**: Authentication and password recovery (AUTH-022 through AUTH-030)
+- **Step 5**: Doctor and Admin functional requirements
+- **Step 10**: Notification orchestration and escalation policies
+- **Step 14**: Adherence rules that are not configurable
+- **Step 15**: Audit requirements for configuration changes
+- **Step 19**: Security requirements for settings interface

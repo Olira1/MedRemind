@@ -20,26 +20,30 @@ This document tracks the 47 approved decisions from the requirements freeze prep
 ## Communication & Notification Decisions
 
 ### D1 - SMS Simultaneous Reminders
-**Status:** ⏳ In progress
+**Status:** ✅ Incorporated
 **Decision:** Multiple reminder occurrences at the same time may be combined into one SMS communication using numbered item codes, but each reminder occurrence retains its own independent adherence decision.
 **Target Documents:** Step 12 (SMS), Step 14 (Adherence)
 **Key Principle:** Communication grouping must never merge underlying reminder/adherence records.
+**Incorporated In:** NOTIF-INVARIANT-001 and NOTIF-REQ-013 in Step 10B, commit 5ae6292
 
 ### D2 - Voice Simultaneous Reminders
-**Status:** ⏳ In progress
+**Status:** ✅ Incorporated
 **Decision:** Multiple reminder occurrences at the same time may be combined into one Voice call. Each medication/reminder must be presented separately with independent DTMF responses.
 **Target Documents:** Step 13 (Voice), Step 14 (Adherence)
+**Incorporated In:** NOTIF-INVARIANT-001 and NOTIF-REQ-015 in Step 10B, commit 5ae6292
 
 ### D3 - Telegram Simultaneous Reminders
-**Status:** ⏳ In progress
+**Status:** ✅ Incorporated
 **Decision:** Multiple reminder occurrences at the same time may be combined into one Telegram message. Each reminder occurrence remains independent with its own response mechanism (inline buttons).
 **Target Documents:** Step 11 (Telegram), Step 14 (Adherence)
+**Incorporated In:** NOTIF-INVARIANT-001 and NOTIF-REQ-010 in Step 10B, commit 5ae6292
 
 ### Combined Communication Invariant
-**Status:** ⏳ In progress
+**Status:** ✅ Incorporated
 **Decision:** System may group several simultaneous reminder occurrences into one communication (Telegram/SMS/Voice), but every reminder occurrence remains an independent domain object with its own lifecycle, notification history, response events, and adherence decision.
 **Target Documents:** Steps 9, 10, 11, 12, 13, 14
 **Critical Rule:** Communication grouping is presentation/delivery optimization only.
+**Incorporated In:** NOTIF-INVARIANT-001 in Step 10B, commit 5ae6292
 
 ---
 
@@ -72,10 +76,11 @@ This document tracks the 47 approved decisions from the requirements freeze prep
 ## Provider & Channel Decisions
 
 ### D6 - Provider Outage Behavior
-**Status:** ⏳ In progress
+**Status:** ✅ Incorporated
 **Decision:** If notification provider fails: (1) Retry per policy, (2) Transition to next escalation channel when applicable, (3) Preserve notification attempt/history, (4) Record failure, (5) Never convert PROVIDER_FAILURE into NOT_TAKEN
 **Target Documents:** Step 10 (Notification), Steps 11/12/13 (Channels)
 **Critical Rule:** Provider failure and adherence are separate concepts
+**Incorporated In:** NOTIF-INVARIANT-002 in Step 10B, commit 5ae6292
 
 ### D7-D12 - Communication Availability
 **Status:** ⏳ In progress
@@ -193,7 +198,7 @@ This document tracks the 47 approved decisions from the requirements freeze prep
 ## Account & Security Decisions
 
 ### D27 - First Admin Bootstrap
-**Status:** ⏳ In progress
+**Status:** ✅ Incorporated
 **Required Security Properties:**
 1. First Admin creation through controlled initial deployment/setup
 2. No permanent master password
@@ -205,15 +210,17 @@ This document tracks the 47 approved decisions from the requirements freeze prep
 8. Bootstrap mechanism cannot arbitrarily create additional Admins
 **Target Documents:** Steps 4, 19
 **Note:** Define security properties first; implementation mechanism later
+**Incorporated In:** AUTH-031, AUTH-032, AUTH-033 in Step 4B section 4.13, commit 0de38e6
 
 ### D28 - Admin MFA
-**Status:** ⏳ In progress
+**Status:** ✅ Incorporated
 **Decision:** Admin MFA is mandatory in Phase 1. Doctor MFA architecturally supported but not mandatory (if already in requirements, preserve per current normative version).
 **Target Documents:** Step 4
 **Rule:** Do not weaken this requirement
+**Incorporated In:** AUTH-003, AUTH-009, AUTH-010, AUTH-011, AUTH-012 in Step 4B, confirmed in Phase 1 summary table, commit 0de38e6
 
 ### D29 - Password Recovery Ownership
-**Status:** ⏳ In progress
+**Status:** ✅ Incorporated  
 **Approved Behavior:**
 - Doctor/Admin can request password reset through registered email
 - System must not reveal whether email belongs to account
@@ -231,6 +238,7 @@ This document tracks the 47 approved decisions from the requirements freeze prep
 **Ownership:** Step 4 is normative owner
 **Target Documents:** Step 4 (primary), Step 17 (UI entry point only)
 **Rule:** Avoid duplicating as conflicting requirements in Step 17
+**Incorporated In:** AUTH-022 through AUTH-030 in Step 4B sections 4.10-4.12, commit 0de38e6 (already present in original Step 4B)
 
 ---
 
