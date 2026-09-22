@@ -43,7 +43,7 @@
 | 17A | step 17A.md | SUPERSEDED | Original settings requirements |
 | 17B | step 17B.md | CURRENT/NORMATIVE | Settings with doctor patient-level config & password recovery - replaces 17A |
 | 18 | step 18.md | APPROVED | Non-functional requirements - locked |
-| 19 | step 19.md | APPROVED | Security requirements - locked |
+| 19 | step 19.md | CURRENT/NORMATIVE | Security requirements with webhook authenticity, deactivated staff enforcement, retention policy - normalized |
 | 20 | step 20.md | APPROVED | Requirement acceptance criteria - locked |
 
 ---

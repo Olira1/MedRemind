@@ -214,16 +214,16 @@ This document tracks the 47 approved decisions from the requirements freeze prep
 6. Process creates first Admin with required security controls
 7. Initial Admin creation auditable
 8. Bootstrap mechanism cannot arbitrarily create additional Admins
-**Target Documents:** Steps 4, 19
+**Target Documents:** Steps 4B, 19
 **Note:** Define security properties first; implementation mechanism later
-**Incorporated In:** AUTH-031, AUTH-032, AUTH-033 in Step 4B section 4.13, commit 0de38e6
+**Incorporated In:** AUTH-031, AUTH-032, AUTH-033 in Step 4B section 4.13 (commit 0de38e6), SEC-009 cross-reference in Step 19 (this commit)
 
 ### D28 - Admin MFA
 **Status:** ✅ Incorporated
 **Decision:** Admin MFA is mandatory in Phase 1. Doctor MFA architecturally supported but not mandatory (if already in requirements, preserve per current normative version).
-**Target Documents:** Step 4
+**Target Documents:** Step 4B, Step 19
 **Rule:** Do not weaken this requirement
-**Incorporated In:** AUTH-003, AUTH-009, AUTH-010, AUTH-011, AUTH-012 in Step 4B, confirmed in Phase 1 summary table, commit 0de38e6
+**Incorporated In:** AUTH-003, AUTH-009, AUTH-010, AUTH-011, AUTH-012 in Step 4B, confirmed in Phase 1 summary table (commit 0de38e6), SEC-006 cross-reference in Step 19 (this commit)
 
 ### D29 - Password Recovery Ownership
 **Status:** ✅ Incorporated  
@@ -241,10 +241,10 @@ This document tracks the 47 approved decisions from the requirements freeze prep
 - Admin losing both password and email uses organization/deployment-owner recovery
 - No hidden master password/backdoor
 - Password reset may revoke existing sessions
-**Ownership:** Step 4 is normative owner
-**Target Documents:** Step 4 (primary), Step 17 (UI entry point only)
+**Ownership:** Step 4B is normative owner
+**Target Documents:** Step 4B (primary), Step 17B (UI entry point only), Step 19 (security controls)
 **Rule:** Avoid duplicating as conflicting requirements in Step 17
-**Incorporated In:** AUTH-022 through AUTH-030 in Step 4B sections 4.10-4.12, commit 0de38e6 (already present in original Step 4B)
+**Incorporated In:** AUTH-022 through AUTH-030 in Step 4B sections 4.10-4.12 (commit 0de38e6), SEC-030 cross-reference in Step 19 (this commit)
 
 ---
 
@@ -254,8 +254,8 @@ This document tracks the 47 approved decisions from the requirements freeze prep
 **Status:** ✅ Incorporated
 **Decision:** State-changing webhooks must use provider-supported authenticity verification whenever provider offers verification mechanism. If webhook cannot be authenticated sufficiently, must not be trusted for state-changing operations.
 **Additional Requirements:** Webhook processing must be idempotent, validated against expected reminder/patient/channel context, protected against replay/duplicate
-**Target Documents:** Steps 10, 11, 12, 13, 19
-**Incorporated In:** TEL-025, TEL-026, TEL-045, TEL-046 in Step 11 (commit 0dc0f8e), SMS-025, SMS-036, SMS-057, SMS-058 in Step 12 (commit 4b0d2b5), VOI-031, VOI-060, VOI-061 in Step 13 (commit 6255a5a)
+**Target Documents:** Steps 10B, 11, 12, 13, 19
+**Incorporated In:** TEL-025, TEL-026, TEL-045, TEL-046 in Step 11 (commit 0dc0f8e), SMS-025, SMS-036, SMS-057, SMS-058 in Step 12 (commit 4b0d2b5), VOI-031, VOI-060, VOI-061 in Step 13 (commit 6255a5a), SEC-038 through SEC-042 in Step 19 (this commit)
 
 ---
 
@@ -374,15 +374,17 @@ This document tracks the 47 approved decisions from the requirements freeze prep
 ## Special Conditions & Edge Cases
 
 ### D40 - Deactivated Staff Accounts
-**Status:** ⏳ In progress
+**Status:** ✅ Incorporated
 **Decision:** Inactive/deactivated staff account cannot access protected functionality. Server-side enforcement required. Don't rely solely on frontend hiding. Existing sessions/tokens rejected or revoked per authentication/session design.
-**Target Documents:** Steps 4, 5, 19
+**Target Documents:** Steps 4B, 5, 19
+**Incorporated In:** SEC-016 in Step 19 with server-side enforcement requirements, cross-reference to Step 4B session handling, audit requirements per Step 15 (this commit)
 
 ### D41 - Retention
-**Status:** ⏳ In progress
+**Status:** ✅ Incorporated
 **Decision:** Do not invent legal retention period. State that reminder/adherence/notification/audit history retained per documented/configurable retention policy. Exact legal/organizational duration specified before production if not already defined. No silent deletion, controlled deletion/archival, traceable retention behavior.
 **Target Documents:** Steps 15, 19
 **Rule:** Don't pretend specific Ethiopian legal retention period established unless repository explicitly establishes it
+**Incorporated In:** SEC-022 in Step 19 with retention policy requirements, controlled deletion procedures, audit trail preservation (this commit)
 
 ---
 
@@ -465,7 +467,7 @@ This document tracks the 47 approved decisions from the requirements freeze prep
 
 ## Incorporation Progress
 
-**Overall Status:** ⏳ In progress (28 of 47 decisions incorporated = 60%)
+**Overall Status:** ⏳ In progress (31 of 47 decisions incorporated = 66%)
 
 **Decisions Fully Incorporated:**
 - D1 (SMS simultaneous - Step 10B + Step 12), D2 (Voice simultaneous - Step 10B + Step 13), D3 (Telegram simultaneous - Step 10B + Step 11), Combined Communication Invariant
@@ -475,9 +477,10 @@ This document tracks the 47 approved decisions from the requirements freeze prep
 - D22 (one active channel)
 - D24 (config authority), D25 (config precedence), D26 (non-configurable rules)
 - D27 (First Admin), D28 (Admin MFA), D29 (password recovery)
-- D30 (webhook security - Step 11 + Step 12 + Step 13)
+- D30 (webhook security - Step 11 + Step 12 + Step 13 + Step 19)
 - D31 (SMS/Voice production - Step 10B + Step 12 + Step 13), D32 (provider abstraction - Step 10B + Step 12 + Step 13), D33 (orchestrator - Step 10B + Step 12 + Step 13)
 - D36 (NFR documentation), D37 (Docker)
+- D40 (deactivated staff), D41 (retention)
 
 **Decisions Pending:**
 - D7-D12 (communication availability rules - covered implicitly in Step 10B/11/12/13, may need verification)
@@ -486,8 +489,6 @@ This document tracks the 47 approved decisions from the requirements freeze prep
 - D35 (dashboard - pending Step 16)
 - D38 (traceability - pending Phase 3)
 - D39 (acceptance criteria - pending Step 20)
-- D40 (deactivated staff - pending Step 19)
-- D41 (retention - pending Step 15/19)
 - D42 (exclusions - verification pending)
 - D43-D47 (scope, meta-requirements, verification - Phase 3)
 
