@@ -36,7 +36,7 @@ This document tracks the 47 approved decisions from the requirements freeze prep
 **Status:** ✅ Incorporated
 **Decision:** Multiple reminder occurrences at the same time may be combined into one Telegram message. Each reminder occurrence remains independent with its own response mechanism (inline buttons).
 **Target Documents:** Step 11 (Telegram), Step 14 (Adherence)
-**Incorporated In:** NOTIF-INVARIANT-001 and NOTIF-REQ-010 in Step 10B, commit 5ae6292
+**Incorporated In:** NOTIF-INVARIANT-001 and NOTIF-REQ-010 in Step 10B (commit 5ae6292), TEL-040, TEL-041, TEL-042, TEL-043 in Step 11 (commit 0dc0f8e)
 
 ### Combined Communication Invariant
 **Status:** ✅ Incorporated
@@ -103,10 +103,11 @@ This document tracks the 47 approved decisions from the requirements freeze prep
 **Target Documents:** Steps 6 (Patient), 10 (Notification)
 
 ### D15 - Telegram Lifecycle
-**Status:** ⏳ In progress
+**Status:** ✅ Incorporated
 **Decision:** Telegram must support link/unlink/relink. When relinking: old association becomes inactive, old tokens invalidated, new identity becomes active, historical records unchanged.
 **Target Documents:** Step 11 (Telegram)
 **Rule:** Telegram identity must not be primary patient identity
+**Incorporated In:** NOTIF-REQ-011 in Step 10B (commit 5ae6292), TEL-038, TEL-039 in Step 11 (commit 0dc0f8e)
 
 ### D16 - SMS Response Association
 **Status:** ⏳ In progress
@@ -250,10 +251,11 @@ This document tracks the 47 approved decisions from the requirements freeze prep
 ## Webhook & Integration Decisions
 
 ### D30 - Webhook Security
-**Status:** ⏳ In progress
+**Status:** ✅ Incorporated
 **Decision:** State-changing webhooks must use provider-supported authenticity verification whenever provider offers verification mechanism. If webhook cannot be authenticated sufficiently, must not be trusted for state-changing operations.
 **Additional Requirements:** Webhook processing must be idempotent, validated against expected reminder/patient/channel context, protected against replay/duplicate
 **Target Documents:** Steps 10, 11, 12, 13, 19
+**Incorporated In:** TEL-025 (idempotency), TEL-026 (secure processing), TEL-045 (authenticity verification), TEL-046 (unverifiable not trusted) in Step 11 (commit 0dc0f8e)
 
 ---
 
@@ -460,7 +462,34 @@ This document tracks the 47 approved decisions from the requirements freeze prep
 
 ## Incorporation Progress
 
-**Overall Status:** ⏳ In progress (0% complete)
+**Overall Status:** ⏳ In progress (26 of 47 decisions incorporated = 55%)
+
+**Decisions Fully Incorporated:**
+- D1 (SMS simultaneous), D2 (Voice simultaneous), D3 (Telegram simultaneous - Step 10B + Step 11), Combined Communication Invariant
+- D4 (scale targets), D5 (RPO/RTO), D6 (provider outage)
+- D13 (phone cardinality), D14 (in-flight contact), D15 (Telegram lifecycle - Step 10B + Step 11), D16 (SMS response)
+- D17 (closed channel adherence), D18 (main states), D19 (CONFLICTING as event), D20 (adherence rules), D21 (delivery ≠ adherence - Step 10B + Step 14B + Step 11)
+- D22 (one active channel)
+- D24 (config authority), D25 (config precedence), D26 (non-configurable rules)
+- D27 (First Admin), D28 (Admin MFA), D29 (password recovery)
+- D30 (webhook security - Step 11)
+- D31 (SMS/Voice production), D32 (provider abstraction), D33 (orchestrator)
+- D36 (NFR documentation), D37 (Docker)
+
+**Decisions Partially Incorporated:**
+- D30: Incorporated in Step 11 (Telegram), pending Step 12 (SMS), Step 13 (Voice), Step 19 (Security)
+
+**Decisions Pending:**
+- D7-D12 (communication availability rules - pending verification in Step 10B/11/12/13)
+- D23 (Admin clinical authority - pending Step 2/5/19)
+- D34 (audit - pending Step 15)
+- D35 (dashboard - pending Step 16)
+- D38 (traceability - pending Phase 3)
+- D39 (acceptance criteria - pending Step 20)
+- D40 (deactivated staff - pending Step 19)
+- D41 (retention - pending Step 15/19)
+- D42 (exclusions - verification pending)
+- D43-D47 (scope, meta-requirements, verification - Phase 3)
 
 **Next Steps:**
 1. Update CURRENT/NORMATIVE documents with approved decisions
