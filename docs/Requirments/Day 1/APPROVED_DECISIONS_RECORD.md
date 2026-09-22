@@ -83,13 +83,16 @@ This document tracks the 47 approved decisions from the requirements freeze prep
 **Incorporated In:** NOTIF-INVARIANT-002 in Step 10B, commit 5ae6292
 
 ### D7-D12 - Communication Availability
-**Status:** ⏳ In progress
+**Status:** ✅ Incorporated
 **Decisions:**
 - Telegram available only when patient has explicitly linked and backend has valid association
 - SMS requires valid configured phone number
 - Voice requires valid configured phone number
 - System must not attempt delivery through unavailable channels
 **Target Documents:** Steps 6 (Patient), 10 (Notification), 11/12/13 (Channels)
+**Incorporated In:** 
+- Step 10B: NOTIF-REQ-001 (Telegram availability), NOTIF-REQ-002 (SMS availability), NOTIF-REQ-003 (Voice availability)
+- Channel-specific requirements further detailed in Steps 11, 12, 13
 
 ### D13 - Phone Number Cardinality
 **Status:** ⏳ In progress
@@ -166,10 +169,14 @@ This document tracks the 47 approved decisions from the requirements freeze prep
 ## Authorization & Access Control Decisions
 
 ### D23 - Admin Clinical Authority
-**Status:** ⏳ In progress
+**Status:** ✅ Incorporated
 **Decision:** Doctors manage clinical records for assigned patients including medication information, schedules, reminder configuration within system/Admin boundaries. Admin has broad system/operational authority but does not ordinarily modify clinical treatment records merely because account has administrative privileges.
 **Target Documents:** Steps 2, 4, 5, 17, 19
 **Rule:** Exceptional administrative clinical workflows must be explicitly authorized, narrowly scoped, audited
+**Incorporated In:** 
+- Step 17B: SET-004 (Administrative clinical authority boundary - authoritative)
+- Step 19: SEC-013 (Administrative scope enforcement - authoritative)
+**Note:** Steps 17B and 19 are the authoritative locations enforcing the Admin clinical authority boundary
 
 ### D24 - Reminder/Escalation Configuration Authority
 **Status:** ⏳ In progress
@@ -467,14 +474,14 @@ This document tracks the 47 approved decisions from the requirements freeze prep
 
 ## Incorporation Progress
 
-**Overall Status:** ⏳ In progress (31 of 47 decisions incorporated = 66%)
+**Overall Status:** ⏳ In progress (33 of 47 decisions incorporated = 70%)
 
 **Decisions Fully Incorporated:**
 - D1 (SMS simultaneous - Step 10B + Step 12), D2 (Voice simultaneous - Step 10B + Step 13), D3 (Telegram simultaneous - Step 10B + Step 11), Combined Communication Invariant
 - D4 (scale targets), D5 (RPO/RTO), D6 (provider outage)
-- D13 (phone cardinality - Step 10B + Step 12 + Step 13), D14 (in-flight contact - Step 10B + Step 12 + Step 13), D15 (Telegram lifecycle - Step 10B + Step 11), D16 (SMS response - Step 10B + Step 12)
+- D7-D12 (communication availability - Step 10B), D13 (phone cardinality - Step 10B + Step 12 + Step 13), D14 (in-flight contact - Step 10B + Step 12 + Step 13), D15 (Telegram lifecycle - Step 10B + Step 11), D16 (SMS response - Step 10B + Step 12)
 - D17 (closed channel adherence), D18 (main states), D19 (CONFLICTING as event), D20 (adherence rules), D21 (delivery ≠ adherence - Step 10B + Step 11 + Step 12 + Step 13 + Step 14B)
-- D22 (one active channel)
+- D22 (one active channel), D23 (Admin clinical authority - Step 17B + Step 19)
 - D24 (config authority), D25 (config precedence), D26 (non-configurable rules)
 - D27 (First Admin), D28 (Admin MFA), D29 (password recovery)
 - D30 (webhook security - Step 11 + Step 12 + Step 13 + Step 19)
@@ -483,8 +490,6 @@ This document tracks the 47 approved decisions from the requirements freeze prep
 - D40 (deactivated staff), D41 (retention)
 
 **Decisions Pending:**
-- D7-D12 (communication availability rules - covered implicitly in Step 10B/11/12/13, may need verification)
-- D23 (Admin clinical authority - pending Step 2/5/19)
 - D34 (audit - pending Step 15)
 - D35 (dashboard - pending Step 16)
 - D38 (traceability - pending Phase 3)
