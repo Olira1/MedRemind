@@ -118,23 +118,26 @@ This document tracks the 47 approved decisions from the requirements freeze prep
 ## Adherence & Response Window Decisions
 
 ### D17 - Adherence Response Window
-**Status:** ⏳ In progress
+**Status:** ✅ Incorporated
 **Decision:** A closed channel can NEVER change adherence. Only the currently eligible/open response channel can produce accepted adherence decision.
 **Target Documents:** Step 14 (Adherence), Step 10 (Notification)
 **Critical Rule:** Responses through closed channels may be preserved as events but cannot change adherence
+**Incorporated In:** ADH-PRINCIPLE-001, ADH-REQ-001, ADH-REQ-002 (critical safety invariant), ADH-REQ-003 in Step 14B, commit 574c6a5
 
 ### D18 - Main Adherence States
-**Status:** ⏳ In progress
+**Status:** ✅ Incorporated
 **Decision:** Main adherence states: PENDING, TAKEN, NOT_TAKEN, NO_RESPONSE. Do not introduce CONFLICTING as primary adherence state.
 **Target Documents:** Step 14 (Adherence)
+**Incorporated In:** ADH-PRINCIPLE-002 (main states), ADH-REQ-018-020 (classification) in Step 14B, commit 574c6a5
 
 ### D19 - CONFLICTING Behavior
-**Status:** ⏳ In progress
+**Status:** ✅ Incorporated
 **Decision:** CONFLICTING is an event/processing condition, NOT an adherence state. If concurrent response events create conflict: preserve raw events, detect conflict, resolve deterministically, do not expose CONFLICTING as normal adherence outcome.
 **Target Documents:** Step 14 (Adherence)
+**Incorporated In:** ADH-PRINCIPLE-003, ADH-REQ-016-017 (conflict handling) in Step 14B, commit 574c6a5
 
 ### D20 - Adherence Rules
-**Status:** ⏳ In progress
+**Status:** ✅ Incorporated
 **Valid Responses:**
 - Telegram: Taken/Not Taken
 - SMS: 1=Taken, 2=Not Taken
@@ -142,12 +145,14 @@ This document tracks the 47 approved decisions from the requirements freeze prep
 **Invalid Responses:** Unrecognized text/button/DTMF must not automatically change adherence. Record as UNRECOGNIZED_RESPONSE.
 **No Response:** If response window closes without valid accepted response → NO_RESPONSE (not NOT_TAKEN)
 **Target Documents:** Steps 11, 12, 13, 14
+**Incorporated In:** ADH-REQ-005-010 (valid responses, unrecognized handling, NO_RESPONSE generation) in Step 14B, commit 574c6a5
 
 ### D21 - Delivery ≠ Adherence
-**Status:** ⏳ In progress
+**Status:** ✅ Incorporated
 **Decision:** Telegram delivered ≠ Taken. SMS delivered ≠ Taken. Voice answered ≠ Taken. Only accepted valid patient response changes adherence.
 **Target Documents:** Steps 10, 11, 12, 13, 14
 **Critical Invariant:** Must be explicit across all documents
+**Incorporated In:** NOTIF-INVARIANT-003 in Step 10B (commit 5ae6292), ADH-REQ-011-012 in Step 14B (commit 574c6a5)
 
 ### D22 - One Active Response Channel
 **Status:** ⏳ In progress
