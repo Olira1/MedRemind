@@ -802,10 +802,10 @@ Here is the proposed formal specification.
 | TEL-020 | The system shall validate that a Telegram response belongs to the expected patient and reminder.                                                                |
 | TEL-021 | Telegram callback data shall not unnecessarily contain sensitive patient or clinical information.                                                               |
 | TEL-022 | Telegram callbacks shall use an opaque/internal reference to identify the relevant notification/reminder.                                                       |
-| TEL-023 | The backend shall verify the reminder state before accepting a Telegram response.                                                                               |
-| TEL-024 | Responses received for expired reminders shall be handled according to the defined late-response policy rather than automatically treated as current responses. |
+| TEL-023 | The backend shall verify the reminder state and channel eligibility before accepting a Telegram response.                                                       |
+| TEL-024 | Responses received for closed/expired reminders or through closed channels shall be handled according to the defined late-response and closed-channel policies defined in Step 14B rather than automatically treated as current responses. |
 | TEL-025 | Telegram webhook processing shall be idempotent.                                                                                                                |
-| TEL-026 | Telegram webhook events shall be processed securely.                                                                                                            |
+| TEL-026 | Telegram webhook events shall be processed securely using appropriate authentication and validation mechanisms.                                                 |
 | TEL-027 | Telegram-specific failures shall be translated into the application's internal notification status/error model.                                                 |
 | TEL-028 | Telegram failures shall be handled by the Notification Orchestrator according to the general retry/fallback policy.                                             |
 | TEL-029 | Telegram integration code shall be isolated behind a Telegram adapter/interface.                                                                                |
@@ -817,6 +817,16 @@ Here is the proposed formal specification.
 | TEL-035 | Telegram bot credentials shall be stored securely and shall not be committed to source control.                                                                 |
 | TEL-036 | Telegram integration logs shall avoid unnecessary exposure of sensitive patient/clinical information.                                                           |
 | TEL-037 | Telegram notification processing shall support the notification escalation timing defined in Step 10.                                                           |
+| TEL-038 | The system shall support Telegram account unlinking and relinking.                                                                                              |
+| TEL-039 | When a patient relinks Telegram: the old Telegram association shall become inactive, old linking tokens shall be invalidated, the new Telegram identity shall become active, and historical notification and adherence records shall remain unchanged. |
+| TEL-040 | Multiple reminder occurrences due at the same time may be combined into one Telegram message for presentation efficiency.                                       |
+| TEL-041 | When simultaneous reminders are combined in one Telegram message, each reminder occurrence shall retain its own independent inline response buttons.            |
+| TEL-042 | Each reminder occurrence shall maintain its own independent adherence decision regardless of Telegram message grouping.                                         |
+| TEL-043 | Communication grouping in Telegram shall not merge underlying reminder or adherence records.                                                                    |
+| TEL-044 | Responses received through a closed Telegram channel (after escalation has moved to another channel) shall be recorded as response events but shall not modify the reminder's adherence state. |
+| TEL-045 | Telegram webhook endpoints shall implement provider-supported authenticity verification mechanisms.                                                             |
+| TEL-046 | State-changing Telegram webhooks that cannot be authenticated sufficiently shall not be trusted for adherence or state-changing operations.                     |
+| TEL-047 | Telegram delivery status shall remain distinct from patient adherence status, consistent with the requirement that delivery does not equal adherence.           |
 
 ---
 
@@ -901,3 +911,73 @@ Return patient response
 Those responsibilities stay in our backend.
 
 Once you accept Step 11, we'll lock it and move to **Step 12 — SMS Requirements**, where we'll define SMS sending, patient replies, incoming SMS handling, provider delivery reports, retries, and the mock/production provider boundary.
+
+
+---
+
+## Cross-Document Consistency Requirements
+
+### Consistency with Step 10B — Notification/Escalation
+
+**TEL-CONSISTENCY-001**
+
+Telegram requirements SHALL be consistent with Step 10B notification requirements, specifically:
+- NOTIF-INVARIANT-001: Communication grouping preserves independent adherence (TEL-040 through TEL-043)
+- NOTIF-INVARIANT-003: Delivery does not equal adherence (TEL-032, TEL-047)
+- NOTIF-INVARIANT-004: One active response channel (TEL-044)
+- NOTIF-REQ-001: Telegram availability rules
+- NOTIF-REQ-010: Telegram simultaneous reminders (TEL-040 through TEL-043)
+- NOTIF-REQ-011: Telegram lifecycle support (TEL-038, TEL-039)
+
+### Consistency with Step 14B — Adherence
+
+**TEL-CONSISTENCY-002**
+
+Telegram response handling SHALL be consistent with Step 14B adherence requirements, specifically:
+- ADH-PRINCIPLE-001: One reminder, one adherence decision (TEL-042, TEL-043)
+- ADH-REQ-002: Closed channels cannot change adherence (TEL-044)
+- ADH-REQ-005: Telegram valid responses are Taken/Not Taken (TEL-014, TEL-016, TEL-017)
+- ADH-REQ-008: Unrecognized responses do not change adherence (cross-reference for Telegram text vs buttons)
+- ADH-REQ-011: Delivery ≠ adherence (TEL-032, TEL-047)
+
+### Consistency with Step 19 — Security
+
+**TEL-CONSISTENCY-003**
+
+Telegram security requirements SHALL be consistent with Step 19 security requirements, specifically:
+- Webhook authenticity verification (TEL-045, TEL-046)
+- Credential protection (TEL-035)
+- Sensitive data minimization in logs (TEL-036)
+- Callback data security (TEL-021, TEL-022)
+
+---
+
+## Requirement Ownership
+
+**Step 11 owns:**
+- Telegram-specific channel behavior
+- Telegram linking/unlinking/relinking
+- Telegram bot configuration
+- Telegram message formatting and localization
+- Telegram callback handling
+- Telegram webhook processing
+- Telegram provider abstraction
+
+**Step 11 does NOT own:**
+- Notification escalation logic (Step 10)
+- Adherence decision rules (Step 14)
+- Reminder generation (Step 9)
+- Audit logging (Step 15)
+- Security implementation details (Step 19)
+- Configuration/settings UI (Step 17)
+
+---
+
+## Implementation Notes
+
+- Exact Telegram Bot API version and library selection are implementation details
+- Telegram message formatting templates will be defined during implementation
+- Webhook endpoint URL structure is an implementation detail
+- Callback payload encoding/structure is an implementation detail subject to security requirements
+- Telegram rate limiting handling is provider-specific and shall be abstracted
+- Telegram Bot credentials management follows Step 19 secret management requirements
