@@ -24,13 +24,13 @@ This document tracks the 47 approved decisions from the requirements freeze prep
 **Decision:** Multiple reminder occurrences at the same time may be combined into one SMS communication using numbered item codes, but each reminder occurrence retains its own independent adherence decision.
 **Target Documents:** Step 12 (SMS), Step 14 (Adherence)
 **Key Principle:** Communication grouping must never merge underlying reminder/adherence records.
-**Incorporated In:** NOTIF-INVARIANT-001 and NOTIF-REQ-013 in Step 10B, commit 5ae6292
+**Incorporated In:** NOTIF-INVARIANT-001 and NOTIF-REQ-013 in Step 10B (commit 5ae6292), SMS-046, SMS-047, SMS-048, SMS-049 in Step 12 (commit 4b0d2b5)
 
 ### D2 - Voice Simultaneous Reminders
 **Status:** ✅ Incorporated
 **Decision:** Multiple reminder occurrences at the same time may be combined into one Voice call. Each medication/reminder must be presented separately with independent DTMF responses.
 **Target Documents:** Step 13 (Voice), Step 14 (Adherence)
-**Incorporated In:** NOTIF-INVARIANT-001 and NOTIF-REQ-015 in Step 10B, commit 5ae6292
+**Incorporated In:** NOTIF-INVARIANT-001 and NOTIF-REQ-015 in Step 10B (commit 5ae6292), VOI-049, VOI-050, VOI-051, VOI-052 in Step 13 (commit 6255a5a)
 
 ### D3 - Telegram Simultaneous Reminders
 **Status:** ✅ Incorporated
@@ -255,14 +255,14 @@ This document tracks the 47 approved decisions from the requirements freeze prep
 **Decision:** State-changing webhooks must use provider-supported authenticity verification whenever provider offers verification mechanism. If webhook cannot be authenticated sufficiently, must not be trusted for state-changing operations.
 **Additional Requirements:** Webhook processing must be idempotent, validated against expected reminder/patient/channel context, protected against replay/duplicate
 **Target Documents:** Steps 10, 11, 12, 13, 19
-**Incorporated In:** TEL-025 (idempotency), TEL-026 (secure processing), TEL-045 (authenticity verification), TEL-046 (unverifiable not trusted) in Step 11 (commit 0dc0f8e)
+**Incorporated In:** TEL-025, TEL-026, TEL-045, TEL-046 in Step 11 (commit 0dc0f8e), SMS-025, SMS-036, SMS-057, SMS-058 in Step 12 (commit 4b0d2b5), VOI-031, VOI-060, VOI-061 in Step 13 (commit 6255a5a)
 
 ---
 
 ## Production & Deployment Decisions
 
 ### D31 - SMS/Voice Production Status
-**Status:** ⏳ In progress
+**Status:** ✅ Incorporated
 **Decision:** Phase 1 includes SMS and Voice architecturally, but initial production launch may be Telegram-only.
 **Requirements Must Distinguish:**
 - Development: Real Telegram Bot, Mock SMS provider, Mock Voice provider
@@ -270,17 +270,20 @@ This document tracks the 47 approved decisions from the requirements freeze prep
 - Initial production: Telegram may be active, SMS/Voice may be configured but inactive
 **Target Documents:** Steps 10, 12, 13
 **Rules:** Do not hard-code production SMS/Voice vendor. Do not claim real SMS/Voice provider required for initial release unless explicitly required.
+**Incorporated In:** NOTIF-REQ-018 in Step 10B (commit 5ae6292), SMS-059, SMS-060 in Step 12 (commit 4b0d2b5), VOI-062, VOI-063 in Step 13 (commit 6255a5a)
 
 ### D32 - Provider Abstraction
-**Status:** ⏳ In progress
+**Status:** ✅ Incorporated
 **Decision:** Core application must not directly depend on specific SMS or Voice vendor. Use conceptual interfaces (SmsProvider, VoiceProvider, TelegramProvider). Provider-specific status/errors mapped to internal notification model.
 **Target Documents:** Steps 10, 12, 13
 **Rule:** Exact class/interface names are implementation details
+**Incorporated In:** NOTIF-REQ-016 in Step 10B (commit 5ae6292), SMS-002, SMS-003, SMS-040 in Step 12 (commit 4b0d2b5), VOI-015, VOI-018, VOI-026 in Step 13 (commit 6255a5a)
 
 ### D33 - Notification Architecture Invariant
-**Status:** ⏳ In progress
+**Status:** ✅ Incorporated
 **Decision:** Notification Orchestrator owns: retry decisions, escalation transitions, provider failure handling, channel eligibility, idempotency/concurrency handling, notification attempt creation. Providers should not contain business escalation logic.
 **Target Documents:** Step 10
+**Incorporated In:** NOTIF-REQ-017 in Step 10B (commit 5ae6292), SMS-028, SMS-029, SMS-030 in Step 12 (commit 4b0d2b5), VOI-027, VOI-028, VOI-029, VOI-030 in Step 13 (commit 6255a5a)
 
 ---
 
@@ -462,25 +465,22 @@ This document tracks the 47 approved decisions from the requirements freeze prep
 
 ## Incorporation Progress
 
-**Overall Status:** ⏳ In progress (26 of 47 decisions incorporated = 55%)
+**Overall Status:** ⏳ In progress (28 of 47 decisions incorporated = 60%)
 
 **Decisions Fully Incorporated:**
-- D1 (SMS simultaneous), D2 (Voice simultaneous), D3 (Telegram simultaneous - Step 10B + Step 11), Combined Communication Invariant
+- D1 (SMS simultaneous - Step 10B + Step 12), D2 (Voice simultaneous - Step 10B + Step 13), D3 (Telegram simultaneous - Step 10B + Step 11), Combined Communication Invariant
 - D4 (scale targets), D5 (RPO/RTO), D6 (provider outage)
-- D13 (phone cardinality), D14 (in-flight contact), D15 (Telegram lifecycle - Step 10B + Step 11), D16 (SMS response)
-- D17 (closed channel adherence), D18 (main states), D19 (CONFLICTING as event), D20 (adherence rules), D21 (delivery ≠ adherence - Step 10B + Step 14B + Step 11)
+- D13 (phone cardinality - Step 10B + Step 12 + Step 13), D14 (in-flight contact - Step 10B + Step 12 + Step 13), D15 (Telegram lifecycle - Step 10B + Step 11), D16 (SMS response - Step 10B + Step 12)
+- D17 (closed channel adherence), D18 (main states), D19 (CONFLICTING as event), D20 (adherence rules), D21 (delivery ≠ adherence - Step 10B + Step 11 + Step 12 + Step 13 + Step 14B)
 - D22 (one active channel)
 - D24 (config authority), D25 (config precedence), D26 (non-configurable rules)
 - D27 (First Admin), D28 (Admin MFA), D29 (password recovery)
-- D30 (webhook security - Step 11)
-- D31 (SMS/Voice production), D32 (provider abstraction), D33 (orchestrator)
+- D30 (webhook security - Step 11 + Step 12 + Step 13)
+- D31 (SMS/Voice production - Step 10B + Step 12 + Step 13), D32 (provider abstraction - Step 10B + Step 12 + Step 13), D33 (orchestrator - Step 10B + Step 12 + Step 13)
 - D36 (NFR documentation), D37 (Docker)
 
-**Decisions Partially Incorporated:**
-- D30: Incorporated in Step 11 (Telegram), pending Step 12 (SMS), Step 13 (Voice), Step 19 (Security)
-
 **Decisions Pending:**
-- D7-D12 (communication availability rules - pending verification in Step 10B/11/12/13)
+- D7-D12 (communication availability rules - covered implicitly in Step 10B/11/12/13, may need verification)
 - D23 (Admin clinical authority - pending Step 2/5/19)
 - D34 (audit - pending Step 15)
 - D35 (dashboard - pending Step 16)
