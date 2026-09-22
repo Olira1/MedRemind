@@ -46,8 +46,8 @@ This document tracks the 47 approved decisions from the requirements freeze prep
 ## Scale & Performance Decisions
 
 ### D4 - Phase 1 Scale Targets
-**Status:** ⏳ In progress
-**Approved Targets:**
+**Status:** ✅ Incorporated
+**Decision:** Approved Targets:
 - Up to 1,500 patients
 - Up to 100 doctors
 - Up to 3 Admins
@@ -56,14 +56,16 @@ This document tracks the 47 approved decisions from the requirements freeze prep
 - At least 100 active users
 **Target Documents:** Step 18 (NFRs)
 **Note:** These are design targets, not predictions
+**Incorporated In:** NFR-021, commit 83b98d7
 
 ### D5 - Backup/Recovery Targets
-**Status:** ⏳ In progress
+**Status:** ✅ Incorporated
 **Approved Targets:**
 - RPO ≤ 15 minutes
 - RTO ≤ 1 hour
 **Target Documents:** Step 18 (NFRs)
 **Note:** Must be verified against actual deployment infrastructure capabilities
+**Incorporated In:** NFR-047, commit 83b98d7
 
 ---
 
@@ -295,13 +297,14 @@ This document tracks the 47 approved decisions from the requirements freeze prep
 ## NFR & Technical Decisions
 
 ### D36 - NFR Documentation
-**Status:** ⏳ In progress
+**Status:** ✅ Incorporated
 **Decision:** Normalize NFRs replacing vague phrases ("expected Phase 1 load", "acceptable recovery") with approved quantitative targets from D4 (scale) and D5 (RPO/RTO).
 **Target Documents:** Step 18
 **Rule:** If NFR needs future threshold but none approved, mark as remaining pre-production specification item rather than inventing number
+**Incorporated In:** NFR-021 and NFR-047, commit 83b98d7
 
 ### D37 - Docker Requirement
-**Status:** ⏳ In progress
+**Status:** ✅ Incorporated
 **Decision:** Docker must be represented as actual documented Phase 1 requirement/NFR or deployment requirement.
 **Requirements Establish:**
 - Reproducible containerized development environment
@@ -312,6 +315,7 @@ This document tracks the 47 approved decisions from the requirements freeze prep
 **Current Architecture:** Frontend=Vercel, Backend=Render, Database=Managed PostgreSQL, Redis=Managed Redis
 **Target Documents:** Step 18 (NFRs), potentially new deployment requirements section
 **Rule:** Docker for reproducibility/portable build; don't require every production component in user-managed Docker if architecture doesn't require it
+**Incorporated In:** NFR-061 and NFR-064, commit 83b98d7
 
 ---
 
