@@ -1,368 +1,91 @@
-Great. **Step 15 — Audit Log Requirements is now locked.**
+# STEP 16 — DASHBOARD REQUIREMENTS
 
-We now move to **Step 16 — Dashboard Requirements**. We will focus only on the dashboard in this step.
-
-# Step 16 — Dashboard Requirements
-
-The dashboard is the main working screen for Doctors and Admins after login.
-
-The key principle I recommend is:
-
-> **The dashboard should help a user quickly understand what needs attention and take the appropriate action.**
-
-It should not become a general-purpose analytics/reporting system in Phase 1.
-
----
-
-## 16.1 Dashboard users
-
-There should be different dashboard views according to role.
-
-### Doctor dashboard
-
-A Doctor should see information limited to:
-
-* Their authorized patients
-* Their patients' medication/reminder activity
-* Adherence information within their scope
-* Notification problems requiring attention
-
-### Admin dashboard
-
-Admin should have a broader operational view according to their authorization.
-
-For example:
-
-* Total doctors
-* Total patients
-* Overall reminder activity
-* Notification system health
-* Failed notifications
-* Operational problems
-* Important recent activity
-
-The Admin dashboard should **not expose unnecessary clinical information** merely because the user is an Admin.
-
----
-
-# 16.2 Doctor dashboard — recommended layout
-
-I recommend a relatively simple dashboard.
-
-### A. Summary cards
-
-At the top:
-
-```text
-Patients       Today's Reminders       Taken       Attention Needed
-   125                 310               248              62
-```
-
-These should be calculated from real system data.
-
-The exact metrics should be finalized carefully so that the numbers don't become misleading.
-
----
-
-### B. Today's reminder status
-
-A Doctor should quickly see today's reminder activity.
-
-For example:
-
-| Status              | Count |
-| ------------------- | ----: |
-| Pending             |    18 |
-| Taken               |   248 |
-| Not Taken           |    21 |
-| No Response         |    23 |
-| Failed Notification |     4 |
-
-This gives the Doctor an immediate picture of today's activity.
-
----
-
-### C. Patients needing attention
-
-This is one of the most useful parts.
-
-For example:
-
-```text
-Patients needing attention
-
-Patient A    3 missed responses
-Patient B    2 NOT_TAKEN responses
-Patient C    Notification failures
-Patient D    No response to today's reminders
-```
-
-The Doctor can select a patient and go to the patient's details.
-
-We should **not** call this an AI-generated "risk score" in Phase 1.
-
-It should be based on explicit, understandable rules.
-
----
-
-### D. Recent reminder activity
-
-Show recent reminder events:
-
-```text
-08:15  Patient A — Medication X — TAKEN
-08:10  Patient B — Medication Y — NOT TAKEN
-08:05  Patient C — Medication Z — NO RESPONSE
-08:02  Patient D — Medication X — SMS failed
-```
-
-This should link to the relevant patient/reminder details.
-
----
-
-# 16.3 Patient search
-
-The Doctor dashboard should provide patient search.
-
-Search could use appropriate patient identifiers such as:
-
-* Patient name
-* Patient ID
-* Phone number, subject to privacy rules
-
-The search results must respect doctor authorization.
-
-A Doctor must never be able to search their way into another Doctor's patients.
-
----
-
-# 16.4 Filters
-
-Dashboard information should be filterable where useful.
-
-For example:
-
-### Time
-
-* Today
-* Yesterday
-* Custom date range, if needed
-
-### Reminder/adherence status
-
-* Pending
-* Taken
-* Not Taken
-* No Response
-
-### Notification status
-
-* Sent
-* Delivered
-* Failed
-* etc.
-
-### Patient
-
-* Specific patient
-
-We should avoid adding too many filters in Phase 1 unless they solve a real workflow problem.
-
----
-
-# 16.5 Adherence presentation
-
-The dashboard should distinguish:
-
-**TAKEN**
-
-**NOT TAKEN**
-
-**NO RESPONSE**
-
-These must not be combined into a generic "success/failure" metric.
-
-For example:
-
-```text
-Taken       80%
-Not Taken   10%
-No Response 10%
-```
-
-This is much more meaningful than:
-
-```text
-Adherence: 80%
-```
-
-because "No Response" is not equivalent to "Not Taken."
-
----
-
-# 16.6 Notification monitoring
-
-The dashboard should make important notification failures visible.
-
-For example:
-
-```text
-Notification issues
-
-SMS failures       3
-Voice failures     2
-Telegram failures  1
-```
-
-Selecting the problem should allow the authorized user to investigate the associated reminder/patient.
-
-Again:
-
-> **Notification failure ≠ patient non-adherence.**
-
-The dashboard must preserve this distinction.
-
----
-
-# 16.7 Escalation visibility
-
-Because we have Telegram → SMS → Voice escalation, the dashboard should provide enough information to understand where a reminder currently is.
-
-For example:
-
-```text
-Patient A
-08:00 Telegram → No response
-08:10 SMS      → Waiting for response
-```
-
-Or:
-
-```text
-Patient B
-08:00 Telegram → Taken
-Escalation     → Stopped
-```
-
-This will be especially useful for troubleshooting.
-
----
-
-# 16.8 Dashboard refresh
-
-The dashboard should show reasonably current information.
-
-For Phase 1, I recommend:
-
-* Normal data refresh when the page loads
-* User-triggered refresh
-* Automatic refresh/polling where useful for active reminder/notification status
-
-We do **not** necessarily need a complex real-time WebSocket architecture for the entire dashboard in Phase 1.
-
-If later requirements show a strong need for real-time updates, that can be added deliberately.
-
----
-
-# 16.9 Dashboard actions
-
-The dashboard should be an entry point into actual workflows.
-
-For example:
-
-**Doctor**
-
-* View patient
-* Add patient
-* View medication
-* View reminder history
-* Investigate notification failure
-
-**Admin**
-
-* View doctors
-* View patients within scope
-* View system/notification status
-* Review important audit activity
-* Manage appropriate settings
-
-The dashboard itself should not contain complicated editing workflows.
-
----
-
-# 16.10 Empty states
-
-Production-quality dashboards must handle empty states.
-
-Examples:
-
-> "No patients have been assigned yet."
-
-> "No reminders are scheduled for today."
-
-> "No notification problems detected."
-
-> "No adherence responses have been recorded."
-
-These should be clear and useful rather than showing blank tables.
-
----
-
-# 16.11 Error states
-
-If dashboard data cannot be loaded, the system should clearly tell the user.
-
-For example:
-
-> "We couldn't load today's reminder data. Please try again."
-
-It should not display a misleading `0` just because an API request failed.
-
-This is particularly important for clinical information.
-
----
-
-# 16.12 Privacy
-
-The dashboard should show only the minimum information necessary for the user's role.
-
-For example, a Doctor should not see:
-
-* Other doctors' unrelated patients
-* Unrelated audit records
-* Provider credentials
-* Internal security secrets
-* Unnecessary technical information
-
-Admin access must also follow the defined authorization policy.
-
----
-
-# 16.13 Phase 1 dashboard boundary
-
-I recommend **not** including these in Phase 1 unless we explicitly add them:
-
-* Advanced analytics
-* Predictive adherence scores
-* AI-generated clinical recommendations
-* Complex charts/reports
-* Financial dashboards
-* Billing analytics
-* Population-health analytics
-* Prescription analytics
-* Appointment analytics
-
-The Phase 1 dashboard should primarily be an **operational clinical reminder/adherence dashboard**.
-
----
-
-# Proposed formal Step 16 requirements
-
-## 16. Dashboard Requirements
-
-### Purpose
+## 16.1 Purpose
 
 The system shall provide role-appropriate dashboards that allow authorized users to monitor patients, medication reminders, adherence activity, notification status, and important actions requiring attention.
+
+**Cross-Document Authority:** Step 4B defines authentication and role-based authorization that dashboard access controls enforce. Step 14B defines adherence states that dashboard displays. Step 19 defines security controls including server-side authorization enforcement. This document defines dashboard requirements to provide operational visibility within appropriate role boundaries.
+
+The dashboard serves as the main working interface for clinical reminder and adherence monitoring while maintaining strict authorization boundaries and role separation.
+
+---
+
+## 16.2 Role-Based Dashboard Design
+
+### Doctor Dashboard Scope
+Doctors shall see information limited to:
+* Their authorized/assigned patients only
+* Patient medication and reminder activity within their scope  
+* Adherence information for their patients
+* Notification problems requiring their attention
+* Relevant operational activity within their authorization
+
+### Admin Dashboard Scope  
+Admins shall have broader operational visibility appropriate to their authorized administrative role:
+* System-wide operational information
+* Doctor and patient operational summaries
+* Overall reminder and notification system health
+* Administrative operational problems
+* Important administrative activity
+
+**Critical Boundary:** Admin dashboard shall minimize unnecessary clinical data exposure and shall not grant clinical modification authority merely because the user has administrative privileges.
+
+---
+
+# 16.2 Doctor Dashboard Components
+
+### Summary Information
+The Doctor dashboard shall provide summary cards showing key metrics such as:
+- Total assigned patients
+- Today's reminder activity
+- Adherence status counts  
+- Items requiring attention
+
+### Reminder Status Overview
+Today's reminder activity organized by status:
+- Pending reminders
+- Taken responses
+- Not Taken responses  
+- No Response (timed out)
+- Notification failures
+
+### Patients Needing Attention
+Identification of patients requiring follow-up based on explicit rules such as:
+- Recent NOT_TAKEN responses
+- Multiple NO_RESPONSE occurrences
+- Repeated notification delivery failures
+- Unresolved reminder problems
+
+### Recent Activity
+Display of recent reminder and adherence events with appropriate navigation to detailed records.
+
+---
+
+# 16.3 Dashboard Operational Requirements
+
+### Search and Navigation
+- Patient search within authorized scope
+- Search results must enforce Doctor patient isolation
+- Navigation to patient, medication, and reminder details where authorized
+
+### Filtering and Time Periods
+- Support for current-day and historical views
+- Filtering by adherence states and notification status
+- Appropriate date range selection for operational needs
+
+### Data States and Error Handling  
+- Clear distinction between loading, empty, and error states
+- No misleading zero values when data fails to load
+- Appropriate error messages without exposing sensitive technical details
+
+### Information Refresh
+- Page-load data refresh
+- User-initiated refresh capabilities
+- Appropriate automatic updates for operational information where beneficial
+
+---
+
+# 16.3 Formal Dashboard Requirements
 
 ### DASH-001 — Role-Based Dashboard
 
@@ -374,7 +97,7 @@ A Doctor dashboard shall display information only for patients and records the D
 
 ### DASH-003 — Admin Scope
 
-An Admin dashboard shall display information within the Admin's authorized administrative scope.
+An Admin dashboard shall display information within the Admin's authorized administrative scope and shall not provide clinical modification authority merely because the user has administrative privileges.
 
 ### DASH-004 — Patient Summary
 
@@ -532,23 +255,63 @@ The dashboard shall not infer clinical conditions, diagnoses, or treatment recom
 
 Dashboard queries shall be designed to provide acceptable response times for the expected Phase 1 data volume without compromising authorization or data accuracy.
 
-## One decision before we lock Step 16
+---
 
-There is one point I recommend we settle now:
+# 16.4 Cross-Document Authority
 
-### Should the Doctor dashboard show **"Patients needing attention"**?
+To prevent conflicting requirements:
 
-My recommendation is **yes**, but it should be based on transparent rules rather than an AI/risk score.
+| Dashboard Area | Primary Requirement Section |
+|----------------|----------------------------|
+| Authentication and role verification | Step 4B |
+| Dashboard role-based access | Step 16 |
+| Adherence state definitions | Step 14B |  
+| Dashboard adherence display | Step 16 |
+| Security and authorization controls | Step 19 |
+| Dashboard server-side enforcement | Step 16 |
+| Audit of dashboard actions | Step 15 |
 
-For example:
+**Critical Rule:** Dashboard requirements shall enforce authorization boundaries established in other documents. Where dashboard displays information governed by other documents, those documents remain authoritative for the business logic while Step 16 defines display and access requirements.
 
-* Recent `NOT_TAKEN`
-* Multiple `NO_RESPONSE`
-* Repeated notification failures
-* A currently unresolved reminder problem
+---
 
-The Doctor can click the patient and investigate the underlying records.
+# 16.5 Dashboard Acceptance Criteria
 
-This would make the dashboard much more useful clinically while staying within Phase 1 scope.
+Step 16 shall be considered satisfied for Phase 1 when:
 
-**If you accept Step 16 with this recommendation, I'll lock it and move to Step 17 — Settings Requirements.**
+1. Role-specific dashboards exist for Doctor and Admin users.
+2. Doctor dashboard displays information only for patients within the Doctor's authorized scope.
+3. Admin dashboard displays information within authorized administrative scope without granting clinical modification authority.
+4. Adherence states are displayed using the correct TAKEN, NOT_TAKEN, NO_RESPONSE, and PENDING states.
+5. NO_RESPONSE is distinguished from NOT_TAKEN in dashboard displays.
+6. Notification delivery failures are not displayed as patient non-adherence.
+7. Patients or reminders needing attention can be identified using explicit, defined rules.
+8. Loading states are distinguishable from zero/no-data states.
+9. Error states do not produce misleading dashboard values or expose sensitive information.
+10. Privacy and minimum-necessary information principles are preserved.
+11. Dashboard does not include prohibited analytics, predictive scoring, or AI functionality.
+12. Dashboard behavior is consistent with approved reminder, notification, and adherence models.
+13. Dashboard access is enforced server-side with appropriate authorization boundaries.
+14. Doctor cannot access another Doctor's patients through dashboard queries or navigation.
+15. Significant dashboard-related administrative actions remain compatible with audit requirements.
+16. Dashboard queries provide acceptable performance for expected Phase 1 data volumes.
+17. Dashboard information remains traceable to underlying patient, medication, and reminder records.
+18. Empty and error states provide clear, useful messages to users.
+19. Dashboard refresh capabilities work without compromising authorization or performance.
+20. Navigation from dashboard to detailed records respects the same authorization boundaries.
+
+---
+
+# 16.6 Relationship With Other Requirements
+
+Step 16 shall support, not override, requirements established elsewhere.
+
+Where dashboard displays adherence information, Step 14B remains the authoritative source for adherence states and business logic.
+
+Where dashboard requires authentication and authorization, Step 4B and Step 19 remain authoritative for security controls.
+
+Where dashboard actions may require auditing, Step 15 remains authoritative for audit requirements.
+
+Where dashboard involves notification information, Steps 10B-13 remain authoritative for notification business logic.
+
+Step 16 defines the dashboard interface requirements necessary to provide appropriate operational visibility while maintaining authorization boundaries and role separation across all system functions.
