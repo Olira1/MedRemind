@@ -301,15 +301,42 @@ Recovery actions shall be appropriately documented and auditable.
 
 ---
 
-## 4.13 Patient Authentication Boundary
+## 4.13 First Admin Bootstrap
 
-### AUTH-031 — No Patient Web Login in Phase 1
+### AUTH-031 — Initial Admin Creation
+
+The first Admin account shall be created through a controlled initial deployment/setup process rather than through the normal user registration interface.
+
+### AUTH-032 — Bootstrap Security Properties
+
+The first Admin bootstrap process shall have the following security properties:
+
+1. First Admin creation occurs through controlled initial deployment/setup
+2. No permanent master password exists in the system
+3. No hidden backdoor authentication mechanism exists
+4. Initial credential/setup secret is securely generated
+5. Initial setup secret is single-use or becomes disabled after initialization
+6. The bootstrap process creates the first Admin with all required security controls (password hashing, MFA enrollment)
+7. Initial Admin creation is auditable
+8. The bootstrap mechanism cannot be used to arbitrarily create additional Admins after initialization
+
+### AUTH-033 — Admin Account Creation Authority
+
+After the first Admin is created, additional Admin accounts may be created through controlled administrative processes defined by organizational policy.
+
+The exact mechanism for ongoing Admin account creation is defined in authorization/access control requirements rather than duplicated here.
+
+---
+
+## 4.14 Patient Authentication Boundary
+
+### AUTH-034 — No Patient Web Login in Phase 1
 
 Patients shall not receive web application login accounts in Phase 1.
 
 Patients shall interact with the system through approved communication and reminder channels.
 
-### AUTH-032 — Patient Identity Separation
+### AUTH-035 — Patient Identity Separation
 
 Patient communication-channel identifiers such as:
 
@@ -324,17 +351,17 @@ The backend shall validate the identity and authorization context associated wit
 
 ---
 
-## 4.14 Authorization Boundary
+## 4.15 Authorization Boundary
 
 Authentication establishes the identity of a user.
 
 Authorization determines what that authenticated user is permitted to access.
 
-### AUTH-033 — Authenticated Access
+### AUTH-036 — Authenticated Access
 
 Protected application resources shall require successful authentication unless explicitly designated as public or system callback endpoints.
 
-### AUTH-034 — Role-Based Authorization
+### AUTH-037 — Role-Based Authorization
 
 The system shall enforce role-based authorization after authentication.
 
@@ -342,7 +369,7 @@ An authenticated Doctor shall not automatically receive Admin permissions.
 
 An authenticated Admin shall receive only the permissions assigned to the Admin role.
 
-### AUTH-035 — Patient Data Authorization
+### AUTH-038 — Patient Data Authorization
 
 Authentication shall not by itself grant access to every patient record.
 
@@ -350,7 +377,7 @@ Patient data access shall be restricted according to the authorization rules def
 
 ---
 
-## 4.15 Authentication Event Auditability
+## 4.16 Authentication Event Auditability
 
 Significant authentication and account-security events shall be available for audit purposes, including where applicable:
 
@@ -371,7 +398,7 @@ Detailed audit requirements are defined in Step 15 — Audit Log Requirements.
 
 ---
 
-## 4.16 Authentication Requirements Outside Step 4
+## 4.17 Authentication Requirements Outside Step 4
 
 The following are intentionally owned by Step 19 rather than duplicated here:
 
@@ -397,7 +424,7 @@ Step 19 defines **the broader security controls required to implement and operat
 
 ---
 
-## 4.17 Phase 1 Authentication Summary
+## 4.18 Phase 1 Authentication Summary
 
 | Area                            | Phase 1 Requirement                    |
 | ------------------------------- | -------------------------------------- |
@@ -407,6 +434,7 @@ Step 19 defines **the broader security controls required to implement and operat
 | Login credential                | Email + password                       |
 | Admin MFA                       | Mandatory                              |
 | Doctor MFA                      | Architecture supported; not mandatory  |
+| First Admin bootstrap           | Controlled deployment process          |
 | Password storage                | Secure password hashing                |
 | Password reset                  | Registered email                       |
 | Reset link                      | Time-limited and single-use            |
@@ -424,7 +452,7 @@ Step 19 defines **the broader security controls required to implement and operat
 
 ---
 
-## 4.18 Requirement Ownership
+## 4.19 Requirement Ownership
 
 Step 4 owns the **authentication behavior and recovery rules**.
 

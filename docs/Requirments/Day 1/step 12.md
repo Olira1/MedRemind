@@ -934,7 +934,7 @@ Whether we ultimately work directly with Ethio Telecom or through another provid
 | SMS-022 | The system shall support provider delivery-status events where the selected provider supports them.                    |
 | SMS-023 | Provider-specific delivery statuses shall be translated into the application's internal notification status model.     |
 | SMS-024 | SMS accepted/sent status shall not automatically be treated as SMS delivered.                                          |
-| SMS-025 | The system shall support secure provider webhooks where applicable.                                                    |
+| SMS-025 | The system shall support secure provider webhooks where applicable, using authentication and validation mechanisms.     |
 | SMS-026 | Duplicate provider webhook events shall not create duplicate state transitions or notification actions.                |
 | SMS-027 | SMS provider errors shall be classified into appropriate retryable/non-retryable conditions where possible.            |
 | SMS-028 | SMS retry behavior shall follow the general Notification Requirements defined in Step 10.                              |
@@ -943,15 +943,34 @@ Whether we ultimately work directly with Ethio Telecom or through another provid
 | SMS-031 | Duplicate SMS sends shall be prevented through the system's idempotency and concurrency controls.                      |
 | SMS-032 | SMS notification attempts shall remain associated with their originating reminder occurrence.                          |
 | SMS-033 | A valid patient response shall stop further notification escalation where applicable.                                  |
-| SMS-034 | Late SMS responses shall be validated against the reminder and notification state before being accepted.               |
+| SMS-034 | Late SMS responses and responses through closed channels shall be validated against the reminder and notification state before being accepted, following the late-response and closed-channel policies defined in Step 14B. |
 | SMS-035 | SMS provider credentials shall be stored securely and shall not be committed to source control.                        |
-| SMS-036 | SMS webhook endpoints shall implement appropriate authentication/verification mechanisms.                              |
+| SMS-036 | SMS webhook endpoints shall implement appropriate authentication/verification mechanisms per provider capabilities.     |
 | SMS-037 | SMS logs shall avoid unnecessary exposure of sensitive patient or clinical information.                                |
 | SMS-038 | The system shall not assume a specific Ethiopian telecom provider in its core SMS implementation.                      |
 | SMS-039 | Production SMS provider selection shall verify Ethiopia-specific coverage and required capabilities before deployment. |
 | SMS-040 | The system shall support provider replacement without rewriting the core reminder and notification business logic.     |
 | SMS-041 | SMS processing shall support the escalation timing defined by the Notification Requirements.                           |
 | SMS-042 | SMS delivery failure shall not automatically be interpreted as patient non-adherence.                                  |
+| SMS-043 | The system shall maintain one active SMS response context per patient at any given time.                                |
+| SMS-044 | The backend shall ensure that incoming SMS responses can be unambiguously associated with the currently active SMS response context for that patient. |
+| SMS-045 | Old/closed SMS response contexts shall not be able to modify adherence for closed or expired reminders.                 |
+| SMS-046 | Multiple reminder occurrences due at the same time may be combined into one SMS communication.                          |
+| SMS-047 | When simultaneous reminders are combined in one SMS, each reminder occurrence shall be addressable using numbered item codes (e.g., "1A", "2A" for Reminder A; "1B", "2B" for Reminder B). |
+| SMS-048 | Each reminder occurrence shall maintain its own independent adherence decision regardless of SMS message grouping.      |
+| SMS-049 | Communication grouping in SMS shall not merge underlying reminder or adherence records.                                 |
+| SMS-050 | Responses received through a closed SMS channel (after escalation has moved to another channel) shall be recorded as response events but shall not modify the reminder's adherence state. |
+| SMS-051 | An SMS notification attempt shall capture the patient's phone number at the time the attempt is created.                |
+| SMS-052 | Future reminder occurrences shall use the patient's current valid phone number configuration.                           |
+| SMS-053 | Changing a patient's phone number after an SMS notification attempt has been created shall not silently rewrite the destination of that already-created attempt. |
+| SMS-054 | The same phone number may appear on multiple patient records in Phase 1.                                                |
+| SMS-055 | The system shall not enforce global phone number uniqueness across patients.                                            |
+| SMS-056 | Patient identity shall be determined by internal Patient ID, not by phone number.                                       |
+| SMS-057 | SMS webhook endpoints shall implement provider-supported authenticity verification mechanisms.                          |
+| SMS-058 | State-changing SMS webhooks that cannot be authenticated sufficiently shall not be trusted for adherence or state-changing operations. |
+| SMS-059 | Initial Phase 1 production deployment may launch with SMS inactive while Telegram is active.                            |
+| SMS-060 | SMS shall remain architecturally prepared (provider abstraction exists, orchestrator supports SMS) such that SMS can be activated in production without redesigning core reminder/notification logic. |
+| SMS-061 | SMS delivery status shall remain distinct from patient adherence status, consistent with the requirement that delivery does not equal adherence. |
 
 ---
 
@@ -1035,3 +1054,98 @@ If there are multiple active SMS reminders that could match the response, the sy
 We can also design a short reminder/reference code if the product requirements eventually require multiple simultaneous SMS response contexts.
 
 I recommend we make this decision **before accepting Step 12**, because it affects the database and API design later.
+
+
+---
+
+## Cross-Document Consistency Requirements
+
+### Consistency with Step 10B — Notification/Escalation
+
+**SMS-CONSISTENCY-001**
+
+SMS requirements SHALL be consistent with Step 10B notification requirements, specifically:
+- NOTIF-INVARIANT-001: Communication grouping preserves independent adherence (SMS-046 through SMS-049)
+- NOTIF-INVARIANT-002: Provider failure never becomes NOT_TAKEN (SMS-042)
+- NOTIF-INVARIANT-003: Delivery does not equal adherence (SMS-024, SMS-061)
+- NOTIF-INVARIANT-004: One active response channel (SMS-043, SMS-044, SMS-045, SMS-050)
+- NOTIF-REQ-002: SMS availability requires valid phone number (SMS-007, SMS-009)
+- NOTIF-REQ-004: Phone number cardinality (SMS-054, SMS-055, SMS-056)
+- NOTIF-REQ-005: In-flight contact change behavior (SMS-051, SMS-052, SMS-053)
+- NOTIF-REQ-013: SMS simultaneous reminders (SMS-046 through SMS-049)
+- NOTIF-REQ-014: SMS response association (SMS-043, SMS-044, SMS-045)
+- NOTIF-REQ-016: Provider abstraction (SMS-002, SMS-003, SMS-040)
+- NOTIF-REQ-017: Notification Orchestrator responsibility (SMS-028, SMS-029, SMS-030)
+- NOTIF-REQ-018: Production channel activation (SMS-059, SMS-060)
+
+### Consistency with Step 14B — Adherence
+
+**SMS-CONSISTENCY-002**
+
+SMS response handling SHALL be consistent with Step 14B adherence requirements, specifically:
+- ADH-PRINCIPLE-001: One reminder, one adherence decision (SMS-048, SMS-049)
+- ADH-REQ-002: Closed channels cannot change adherence (SMS-045, SMS-050)
+- ADH-REQ-006: SMS valid responses are "1"=TAKEN, "2"=NOT_TAKEN (SMS-015, SMS-016, SMS-017)
+- ADH-REQ-008: Unrecognized responses do not change adherence (SMS-018, SMS-019)
+- ADH-REQ-011: Delivery ≠ adherence (SMS-024, SMS-042, SMS-061)
+- ADH-REQ-012: Provider failure ≠ NOT_TAKEN (SMS-042)
+- ADH-REQ-013-015: Response timing and windows (SMS-034)
+
+### Consistency with Step 19 — Security
+
+**SMS-CONSISTENCY-003**
+
+SMS security requirements SHALL be consistent with Step 19 security requirements, specifically:
+- Webhook authenticity verification (SMS-036, SMS-057, SMS-058)
+- Credential protection (SMS-035)
+- Sensitive data minimization in logs (SMS-037)
+- Idempotency and replay protection (SMS-026, SMS-031)
+
+---
+
+## Requirement Ownership
+
+**Step 12 owns:**
+- SMS-specific channel behavior
+- SMS provider abstraction requirements
+- Outgoing SMS delivery
+- Incoming SMS response handling
+- SMS message formatting and encoding constraints
+- SMS webhook processing
+- SMS-specific localization requirements
+- SMS response context management
+
+**Step 12 does NOT own:**
+- Reminder generation (Step 9)
+- Notification escalation logic (Step 10)
+- Adherence decision rules (Step 14)
+- Audit logging (Step 15)
+- Security implementation details (Step 19)
+- Configuration/settings UI (Step 17)
+- Patient clinical records (Step 6)
+
+---
+
+## Implementation Notes
+
+- Exact SMS provider API selection is an implementation detail
+- SMS message templates will be defined during implementation
+- Webhook endpoint URL structure is an implementation detail
+- Phone number normalization format (E.164 or other) is an implementation detail subject to provider requirements
+- SMS encoding (GSM-7, UCS-2, etc.) selection is provider-specific
+- Numbered item code format for simultaneous reminders (e.g., "1A"/"2A" vs other schemes) is an implementation/template detail
+- SMS rate limiting handling is provider-specific and shall be abstracted
+- SMS provider credentials management follows Step 19 secret management requirements
+- Ethiopia-specific provider selection criteria will be evaluated before production launch
+
+---
+
+## Unresolved Human Decisions
+
+**NONE IDENTIFIED** for Step 12.
+
+The one active SMS response context per patient (SMS-043) was already approved.
+
+Simultaneous reminder numbered item code syntax is correctly deferred to implementation/template design.
+
+Late-response policy details are owned by Step 14B.

@@ -907,14 +907,14 @@ Only the provider implementation/configuration changes.
 | VOI-028 | Voice shall follow the escalation timing defined in the Notification Requirements.                                                                           |
 | VOI-029 | Voice shall not independently determine whether SMS or another channel should be used.                                                                       |
 | VOI-030 | Voice provider failures shall be returned to the Notification Orchestrator for retry/fallback handling.                                                      |
-| VOI-031 | Voice webhook events shall be authenticated/verified where supported by the provider.                                                                        |
+| VOI-031 | Voice webhook events shall be authenticated/verified using provider-supported mechanisms where available.                                                    |
 | VOI-032 | Voice webhook events shall be validated against the corresponding call and reminder.                                                                         |
 | VOI-033 | Duplicate Voice webhook events shall not cause duplicate state transitions.                                                                                  |
 | VOI-034 | Duplicate DTMF events shall not create duplicate adherence responses.                                                                                        |
 | VOI-035 | A valid DTMF response shall be passed to the adherence system.                                                                                               |
 | VOI-036 | A valid Taken response shall stop further notification escalation where applicable.                                                                          |
 | VOI-037 | A valid Not Taken response shall stop further notification escalation where applicable.                                                                      |
-| VOI-038 | Voice responses received after reminder expiration shall be handled according to the defined late-response policy.                                           |
+| VOI-038 | Voice responses received after reminder expiration or through closed channels shall be handled according to the late-response and closed-channel policies defined in Step 14B. |
 | VOI-039 | Voice calls shall not be recorded by default in Phase 1 unless a specific requirement is introduced.                                                         |
 | VOI-040 | The system shall minimize unnecessary exposure of sensitive patient/clinical information in Voice messages.                                                  |
 | VOI-041 | Voice logs shall avoid unnecessary storage of sensitive clinical information.                                                                                |
@@ -925,6 +925,23 @@ Only the provider implementation/configuration changes.
 | VOI-046 | The system shall limit repeated invalid/no-response prompts to prevent excessively long calls.                                                               |
 | VOI-047 | Voice notification attempts shall remain associated with their originating reminder occurrence.                                                              |
 | VOI-048 | The Voice implementation shall be testable without making real telephone calls.                                                                              |
+| VOI-049 | Multiple reminder occurrences due at the same time may be combined into one Voice call.                                                                      |
+| VOI-050 | When simultaneous reminders are combined in one Voice call, each medication/reminder shall be presented separately with independent DTMF response collection. |
+| VOI-051 | Each reminder occurrence shall maintain its own independent adherence decision regardless of Voice call grouping.                                            |
+| VOI-052 | Communication grouping in Voice shall not merge underlying reminder or adherence records.                                                                    |
+| VOI-053 | Responses received through a closed Voice channel (after escalation has moved or completed) shall be recorded as response events but shall not modify the reminder's adherence state. |
+| VOI-054 | A Voice call attempt shall capture the patient's phone number at the time the attempt is created.                                                            |
+| VOI-055 | Future reminder occurrences shall use the patient's current valid phone number configuration.                                                                |
+| VOI-056 | Changing a patient's phone number after a Voice call attempt has been created shall not silently rewrite the destination of that already-created attempt.    |
+| VOI-057 | The same phone number may appear on multiple patient records in Phase 1.                                                                                     |
+| VOI-058 | The system shall not enforce global phone number uniqueness across patients.                                                                                 |
+| VOI-059 | Patient identity shall be determined by internal Patient ID, not by phone number.                                                                            |
+| VOI-060 | Voice webhook endpoints shall implement provider-supported authenticity verification mechanisms.                                                             |
+| VOI-061 | State-changing Voice webhooks (DTMF, call outcome) that cannot be authenticated sufficiently shall not be trusted for adherence or state-changing operations. |
+| VOI-062 | Initial Phase 1 production deployment may launch with Voice inactive while Telegram is active.                                                               |
+| VOI-063 | Voice shall remain architecturally prepared (provider abstraction exists, orchestrator supports Voice) such that Voice can be activated in production without redesigning core reminder/notification logic. |
+| VOI-064 | Voice call failure shall not automatically be interpreted as patient non-adherence.                                                                          |
+| VOI-065 | Voice call status shall remain distinct from patient adherence status, consistent with the requirement that call delivery/outcome does not equal adherence.  |
 
 ---
 
@@ -1007,3 +1024,117 @@ That step is especially important because it will formally define exactly what h
 * what doctors see in the patient adherence history
 
 After Step 14, we will have completed the requirements for **Reminder → Notification → Telegram → SMS → Voice → Adherence**, and we can move toward the next major phase: **turning the approved requirements into the technical specification/API and database design**.
+
+
+---
+
+## Cross-Document Consistency Requirements
+
+### Consistency with Step 10B — Notification/Escalation
+
+**VOI-CONSISTENCY-001**
+
+Voice requirements SHALL be consistent with Step 10B notification requirements, specifically:
+- NOTIF-INVARIANT-001: Communication grouping preserves independent adherence (VOI-049 through VOI-052)
+- NOTIF-INVARIANT-002: Provider failure never becomes NOT_TAKEN (VOI-064)
+- NOTIF-INVARIANT-003: Delivery does not equal adherence (VOI-043, VOI-044, VOI-065)
+- NOTIF-INVARIANT-004: One active response channel (VOI-053)
+- NOTIF-REQ-003: Voice availability requires valid phone number (shared with SMS)
+- NOTIF-REQ-004: Phone number cardinality (VOI-057, VOI-058, VOI-059)
+- NOTIF-REQ-005: In-flight contact change behavior (VOI-054, VOI-055, VOI-056)
+- NOTIF-REQ-015: Voice simultaneous reminders (VOI-049 through VOI-052)
+- NOTIF-REQ-016: Provider abstraction (VOI-015, VOI-018, VOI-026)
+- NOTIF-REQ-017: Notification Orchestrator responsibility (VOI-027, VOI-028, VOI-029, VOI-030)
+- NOTIF-REQ-018: Production channel activation (VOI-062, VOI-063)
+
+### Consistency with Step 12 — SMS
+
+**VOI-CONSISTENCY-002**
+
+Voice SHALL be consistent with SMS where both channels share phone-based delivery:
+- Phone number identity (VOI-057, VOI-058, VOI-059 ↔ SMS-054, SMS-055, SMS-056)
+- Phone number validation and normalization principles (VOI-054 ↔ SMS-009, SMS-051)
+- Provider abstraction (VOI-015 ↔ SMS-002, SMS-003)
+- Mock provider development (VOI-016, VOI-017, VOI-048 ↔ SMS-004, SMS-005)
+- Production provider independence (VOI-018 ↔ SMS-006, SMS-040)
+- Webhook security (VOI-031, VOI-060, VOI-061 ↔ SMS-036, SMS-057, SMS-058)
+- Localization (VOI-019, VOI-020, VOI-021 ↔ SMS-010, SMS-011, SMS-012)
+- In-flight contact changes (VOI-054-056 ↔ SMS-051-053)
+- Production activation state (VOI-062, VOI-063 ↔ SMS-059, SMS-060)
+
+### Consistency with Step 14B — Adherence
+
+**VOI-CONSISTENCY-003**
+
+Voice response handling SHALL be consistent with Step 14B adherence requirements, specifically:
+- ADH-PRINCIPLE-001: One reminder, one adherence decision (VOI-051, VOI-052)
+- ADH-REQ-002: Closed channels cannot change adherence (VOI-053)
+- ADH-REQ-007: Voice valid responses are DTMF "1"=TAKEN, "2"=NOT_TAKEN (VOI-004, VOI-005, VOI-008, VOI-035)
+- ADH-REQ-008: Unrecognized responses do not change adherence (VOI-009, VOI-010)
+- ADH-REQ-011: Delivery ≠ adherence (VOI-006, VOI-007, VOI-043, VOI-044, VOI-065)
+- ADH-REQ-012: Provider failure ≠ NOT_TAKEN (VOI-064)
+- ADH-REQ-013-015: Response timing and windows (VOI-038, VOI-045)
+
+### Consistency with Step 19 — Security
+
+**VOI-CONSISTENCY-004**
+
+Voice security requirements SHALL be consistent with Step 19 security requirements, specifically:
+- Webhook authenticity verification (VOI-031, VOI-060, VOI-061)
+- Credential protection (VOI-042)
+- Sensitive data minimization (VOI-040, VOI-041)
+- Idempotency and replay protection (VOI-033, VOI-034)
+
+---
+
+## Requirement Ownership
+
+**Step 13 owns:**
+- Voice-specific channel behavior
+- Automated outbound call requirements
+- DTMF/keypad response handling
+- Voice provider abstraction requirements
+- Call status mapping
+- Voice webhook processing
+- Audio generation/TTS requirements
+- Voice-specific localization requirements
+- Call interaction flow
+
+**Step 13 does NOT own:**
+- Reminder generation (Step 9)
+- Notification escalation logic (Step 10)
+- Adherence decision rules (Step 14)
+- Audit logging (Step 15)
+- Security implementation details (Step 19)
+- Configuration/settings UI (Step 17)
+- Patient clinical records (Step 6)
+- Phone number storage/management (Step 6, shared validation with Step 12)
+
+---
+
+## Implementation Notes
+
+- Exact Voice provider API selection is an implementation detail
+- TTS engine/service selection is an implementation detail subject to localization quality requirements
+- Audio file formats and encoding are implementation details
+- Webhook endpoint URL structure is an implementation detail
+- Phone number normalization format (E.164 or other) is an implementation detail subject to provider requirements
+- DTMF timeout durations are configurable, not hard-coded
+- Maximum invalid-response retry count is configurable
+- Call recording is explicitly excluded from Phase 1 unless requirement changes
+- Audio caching/reuse strategies are implementation optimizations
+- Voice provider credentials management follows Step 19 secret management requirements
+- Ethiopia-specific provider selection criteria will be evaluated before production launch
+- Simultaneous reminder presentation order and prompting is an implementation/template detail
+
+---
+
+## Unresolved Human Decisions
+
+**NONE IDENTIFIED** for Step 13.
+
+Late-response policy details are owned by Step 14B.
+
+Exact DTMF timeout values are correctly deferred to configuration.
+
+Audio generation/TTS provider selection is correctly deferred to implementation.

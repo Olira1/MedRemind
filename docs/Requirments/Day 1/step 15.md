@@ -1,432 +1,56 @@
-Great. **Step 14 — Adherence Requirements is now locked** with the channel-window model we just agreed on.
+# STEP 15 — AUDIT LOG REQUIREMENTS
 
-We now move to **Step 15 — Audit Log Requirements**. We will work on this step only and will not combine it with Step 16.
+## 15.1 Purpose
 
-## Step 15 — Audit Log Requirements
+The audit system shall provide traceability for significant security, administrative, clinical-data, configuration, and business actions performed within the MedReminder system.
 
-### 15.1 What is the purpose of the audit log?
+**Cross-Document Authority:** Step 4B defines authentication behavior that generates audit events. Step 19 defines security controls including retention policies. Step 14B defines adherence behavior that may involve auditable administrative actions. This document defines the audit log requirements to support accountability and traceability across all system functions.
 
-The audit log answers:
-
-> **Who did what, to which record, when, and what happened?**
-
-For a clinical system, this is important for **security, accountability, troubleshooting, privacy, and historical traceability**.
-
-It is different from:
-
-* **Application logs** → technical debugging
-* **Notification history** → Telegram/SMS/Voice delivery events
-* **Adherence records** → patient's medication response
-* **Audit logs** → important user/system actions and changes
-
-For example:
-
-> Doctor changes a patient's medication dose.
-
-That should create an audit event:
-
-```text
-Actor: Doctor
-Action: UPDATE_MEDICATION
-Patient: Patient #123
-Medication: Medication #456
-Time: 2026-09-14 08:30 UTC
-Result: SUCCESS
-```
+The audit log shall answer, where applicable:
+* Who performed the action
+* What action occurred  
+* What record/entity was affected
+* When it occurred
+* Whether it succeeded or failed
+* Relevant correlation/request context
 
 ---
 
-# 15.2 What actions should be audited?
+## 15.2 Audit Scope and Separation
 
-I recommend auditing the following categories.
+The audit log is distinct from:
+* **Application logs** — technical debugging and system monitoring
+* **Notification history** — communication delivery events (Telegram/SMS/Voice)  
+* **Adherence records** — patient medication response data
 
-### A. Authentication and account security
-
-Audit:
-
-* Successful login
-* Failed login
-* Logout where useful
-* Password change
-* Password reset/request
-* Account activation
-* Account deactivation
-* Account lock/unlock
-* Role change
-* Permission/security-setting changes
-
-We should **never** store passwords, password hashes, reset tokens, OTPs, or authentication secrets in the audit log.
+Audit records shall focus on significant user actions, system events, and configuration changes that require accountability, security monitoring, or regulatory traceability.
 
 ---
 
-### B. Patient management
+## 15.3 Audit Event Structure
 
-Audit important patient actions:
+Each audit event shall contain, as applicable:
 
-* Patient created
-* Patient information updated
-* Patient archived/deactivated
-* Patient restored/reactivated
-* Patient transferred between doctors
-* Patient assignment changed
-* Patient communication/contact information changed
-* Telegram linked
-* Telegram unlinked
+| Field | Purpose |
+|-------|---------|
+| `audit_event_id` | Unique audit event identifier |
+| `timestamp` | When the event occurred (UTC) |
+| `actor_type` | Doctor, Admin, System |
+| `actor_id` | Internal identifier of the actor |
+| `action` | Action type using consistent internal classification |
+| `entity_type` | Patient, Medication, Schedule, etc. |
+| `entity_id` | Internal identifier of affected record |
+| `result` | SUCCESS, FAILURE, or specific result code |
+| `request_id` | Correlation identifier for related operations |
+| `metadata` | Limited structured additional context |
 
-For sensitive patient-data access, I recommend also auditing **important patient record views**, especially if the system is intended for real clinical use.
-
-We don't necessarily need to record every UI click such as opening a menu. The audit system should focus on meaningful access and actions.
-
----
-
-### C. Medication management
-
-Audit:
-
-* Medication created
-* Medication updated
-* Medication discontinued
-* Medication reactivated, if supported
-* Medication instructions changed
-* Dosage/frequency changes
-* Medication associated with a patient
-* Medication removed/discontinued
-
-This is particularly important because medication changes can affect future reminders.
+**Change Summary:** For record modifications, audit events should include a minimal structured summary of changed fields without storing complete sensitive records.
 
 ---
 
-### D. Schedule management
+# 15.4 Formal Audit Requirements
 
-Audit:
-
-* Schedule created
-* Schedule updated
-* Schedule activated
-* Schedule paused
-* Schedule discontinued
-* Schedule timing changed
-* Schedule frequency changed
-* Schedule-related configuration changes
-
-Example:
-
-```text
-Doctor
-→ changes medication reminder
-→ 08:00 daily → 08:00 + 20:00 daily
-```
-
-That change should be traceable.
-
----
-
-### E. Reminder and notification actions
-
-Important reminder-related changes should be audited:
-
-* Reminder/schedule configuration changed
-* Reminder cancelled
-* Reminder manually triggered, if we support manual triggering
-* Notification configuration changed
-* Escalation policy changed
-* Notification channel enabled/disabled
-* Provider configuration changed
-
-However, **we should not put every SMS/Telegram/Voice delivery event into the audit log**.
-
-Those belong primarily in notification history.
-
-The audit log can record significant administrative changes to notification configuration.
-
----
-
-### F. Adherence-related administrative actions
-
-Because adherence is clinically important, we should audit significant administrative actions involving it.
-
-For example:
-
-* Authorized user manually corrects an adherence record, if manual correction is allowed
-* An adherence record is marked/reclassified
-* An administrative action changes adherence-related configuration
-
-The underlying patient response event itself remains part of the **adherence data**, not merely an audit record.
-
----
-
-### G. Authorization/security violations
-
-Audit events such as:
-
-* Unauthorized patient access attempt
-* Unauthorized medication access attempt
-* Unauthorized modification attempt
-* Access to another doctor's patient
-* Invalid/expired authorization
-* Suspicious repeated failed access attempts
-
-This will be useful for security monitoring.
-
----
-
-# 15.3 What information should every audit event contain?
-
-I recommend each audit event contain at least:
-
-| Field                         | Purpose                             |
-| ----------------------------- | ----------------------------------- |
-| `id`                          | Unique audit event ID               |
-| `timestamp`                   | When the event occurred             |
-| `actor_type`                  | Doctor, Admin, System               |
-| `actor_id`                    | Who performed it                    |
-| `action`                      | What happened                       |
-| `entity_type`                 | Patient, Medication, Schedule, etc. |
-| `entity_id`                   | Which record was affected           |
-| `result`                      | Success/failure                     |
-| `request_id` / correlation ID | Connect related operations          |
-| `metadata`                    | Limited additional context          |
-
-For example:
-
-```text
-Audit Event
-
-Actor: Doctor
-Actor ID: doctor_123
-Action: UPDATE_MEDICATION
-Entity: Medication
-Entity ID: med_456
-Patient ID: patient_789
-Timestamp: 2026-09-14T08:30:12Z
-Result: SUCCESS
-Request ID: req_abc123
-```
-
----
-
-# 15.4 Should we store "before" and "after" values?
-
-This needs careful handling.
-
-For important configuration changes, knowing **what changed** is very useful.
-
-For example:
-
-```text
-Dose:
-Before: 1 tablet
-After: 2 tablets
-```
-
-However, we should **not blindly copy the entire patient record into the audit log**.
-
-That creates unnecessary duplication of sensitive clinical information.
-
-My recommendation:
-
-> Store a **minimal structured change summary** for important modifications.
-
-For example:
-
-```text
-changed_fields:
-  - dosage
-  - frequency
-```
-
-And, where clinically necessary and appropriate, the relevant old/new values.
-
-We should establish privacy rules around exactly which fields may be stored in audit metadata.
-
----
-
-# 15.5 Who can view audit logs?
-
-This is particularly important because we have separate **Admin** and **Doctor** roles.
-
-My recommendation:
-
-### Admin
-
-Admin can view audit activity within the scope they are authorized to administer.
-
-For a system-wide administrator:
-
-> Organization/system-wide audit visibility.
-
-### Doctor
-
-A doctor should **not** be able to see another doctor's audit activity or unrelated patients.
-
-A doctor can view audit history related to:
-
-* Their own actions
-* Patients they are authorized to access
-* Records within their authorized scope
-
-This preserves doctor-to-doctor isolation.
-
----
-
-# 15.6 Can users modify or delete audit logs?
-
-**No.**
-
-The application should treat audit records as **append-only**.
-
-A Doctor or Admin should not have a normal UI/API operation such as:
-
-> Edit Audit Log
-> Delete Audit Log
-
-This prevents someone from changing the historical record of what happened.
-
-If we eventually need archival or retention deletion for legal/privacy reasons, that should be a controlled system-level process with its own traceability—not an ordinary user action.
-
----
-
-# 15.7 Audit log vs application log
-
-We should explicitly keep these separate.
-
-### Application log
-
-Example:
-
-```text
-Database connection timeout
-Redis connection failed
-BullMQ worker restarted
-HTTP 500 error
-```
-
-Primarily for developers/operators.
-
-### Audit log
-
-Example:
-
-```text
-Doctor changed patient's medication dosage.
-Admin disabled doctor account.
-Doctor transferred patient to another doctor.
-```
-
-Primarily for accountability/security/clinical traceability.
-
-### Notification history
-
-Example:
-
-```text
-Telegram sent
-SMS delivered
-Voice call failed
-SMS response received
-```
-
-### Adherence
-
-Example:
-
-```text
-TAKEN
-NOT_TAKEN
-NO_RESPONSE
-```
-
-These four systems should not be mixed together.
-
----
-
-# 15.8 System-generated audit events
-
-Not every audit event comes from a human.
-
-The system itself may perform important actions.
-
-For example:
-
-```text
-Actor: SYSTEM
-Action: AUTO_ARCHIVE_EXPIRED_LINK
-```
-
-or:
-
-```text
-Actor: SYSTEM
-Action: ESCALATION_TRIGGERED
-```
-
-However, we shouldn't turn every background-job execution into an audit record.
-
-Only **meaningful security/business actions** should be audited.
-
----
-
-# 15.9 Time standard
-
-I recommend that all audit timestamps be stored in:
-
-> **UTC**
-
-The frontend can display the appropriate local time to the user.
-
-This avoids problems with:
-
-* Different users/time zones
-* Server locations
-* Daylight-saving changes
-* Distributed services
-
----
-
-# 15.10 Privacy and sensitive data
-
-Audit logs can themselves become sensitive.
-
-Therefore:
-
-**Never store:**
-
-* Passwords
-* Password hashes
-* Authentication tokens
-* Telegram bot tokens
-* SMS/Voice provider credentials
-* OTPs
-* API keys
-* Full secret webhook payloads
-* Unnecessary full medical records
-* Unnecessary full SMS/Telegram message contents
-
-We should store enough information to establish accountability without creating a second uncontrolled copy of sensitive information.
-
----
-
-# 15.11 Reliability
-
-An important production requirement:
-
-> Critical audit events must not silently disappear.
-
-For example, if a doctor changes a medication and the medication update succeeds but the audit event is lost, we have a serious traceability problem.
-
-During architecture/design we'll therefore need a reliable mechanism for critical audit writes—potentially transactionally or through an appropriate event/outbox pattern.
-
-We don't need to decide the implementation mechanism in the requirements phase; the requirement is that critical audit events are reliably persisted.
-
----
-
-# 15.12 Proposed formal Step 15 requirements
-
-## 15. Audit Log Requirements
-
-### Purpose
-
-The system shall maintain an audit log that provides traceability of significant security, administrative, clinical-data, configuration, and business actions.
+## Audit Event Creation and Structure
 
 ### AUD-001 — Audit Event Creation
 
@@ -588,36 +212,106 @@ Historical audit records shall remain unchanged after creation through normal ap
 
 Audit-log access and storage shall comply with the system's privacy and data-protection requirements.
 
-### AUD-041 — Retention
+### AUD-041 — Retention Policy
 
-Audit-log retention shall follow the retention policy defined by the system's security, privacy, and operational requirements.
+Audit records shall be retained per documented/configurable retention policy.
 
-### AUD-042 — Monitoring
+**Cross-Reference:** Retention policy requirements are defined in Step 19 SEC-022.
+
+### AUD-042 — No Invented Retention Periods  
+
+The system shall not assume specific legal retention durations unless explicitly established by organizational or legal requirements.
+
+### AUD-043 — Controlled Retention Actions
+
+Data retention, archival, and deletion actions affecting audit records shall be:
+* Explicitly authorized
+* Controlled through documented procedures
+* Traceable and auditable
+* Not performed silently through ordinary business operations
+
+### AUD-044 — Retention History Integrity
+
+Retention actions shall preserve audit trail integrity required for accountability and regulatory purposes.
+
+### AUD-045 — Monitoring
 
 Critical audit-log failures shall be detectable by system monitoring and operational alerting.
 
-### AUD-043 — Idempotency
+### AUD-046 — Idempotency
 
 The audit mechanism shall prevent unintended duplicate audit events for the same logical operation where duplicate processing can occur.
 
-### AUD-044 — Provider Independence
+### AUD-047 — Provider Independence
 
 Audit logging shall not depend on a specific SMS, Voice, Telegram, hosting, or cloud provider.
 
-### AUD-045 — Auditability of Critical Changes
+### AUD-048 — Auditability of Critical Changes
 
 Critical changes affecting patient data, medication, schedules, access control, or notification behavior shall be auditable.
 
-### AUD-046 — No Secret Logging
+### AUD-049 — No Secret Logging
 
 The system shall prevent security secrets and credentials from being written into audit metadata or audit payloads.
 
-### The main decision I need from you
+---
 
-Before I lock Step 15, I want you to review **one particularly important policy**:
+# 15.5 Cross-Document Authority
 
-> **Should Doctors be able to view the audit history of patient records they are authorized to access, while Admins can view audit history within their administrative scope?**
+To prevent conflicting requirements:
 
-That is my recommended model.
+| Audit Area | Primary Requirement Section |
+|------------|----------------------------|
+| Authentication event structure | Step 4B |
+| Authentication event auditability | Step 15 |
+| Adherence business logic | Step 14B |
+| Adherence administrative audit | Step 15 |
+| Security controls | Step 19 |
+| Audit requirements | Step 15 |
+| Retention policy framework | Step 19 SEC-022 |
+| Audit-specific retention | Step 15 |
 
-If you accept Step 15 as written, including that access model, I will **lock Step 15** and move to **Step 16 — Dashboard Requirements**.
+**Critical Rule:** Step 15 defines audit requirements to support other documents' business logic. Where audit affects the behavior defined in other documents, those documents remain authoritative for the business behavior while Step 15 defines auditability requirements.
+
+---
+
+# 15.6 Audit Acceptance Criteria
+
+Step 15 shall be considered satisfied for Phase 1 when:
+
+1. Significant authentication and security events are auditable per Step 4B requirements.
+2. Patient management actions are auditable with appropriate privacy controls.
+3. Medication and schedule changes are auditable for clinical traceability.
+4. Reminder and notification configuration changes are auditable.
+5. Adherence-affecting administrative actions are auditable.
+6. Audit events contain actor, action, entity, timestamp, and result information.
+7. Audit timestamps use UTC storage.
+8. Doctor access is limited to authorized patient audit records.
+9. Admin access follows administrative scope boundaries.
+10. Ordinary users cannot edit or delete audit records.
+11. Sensitive secrets are excluded from audit metadata.
+12. Unnecessary sensitive clinical content is minimized in audit records.
+13. Critical audit persistence failures are detectable by monitoring.
+14. Audit logging operates independently of communication providers.
+15. System-generated significant events are auditable where appropriate.
+16. Audit records are distinguishable from application logs and notification history.
+17. Change summaries capture relevant modifications without storing complete records.
+18. Authorization violations and suspicious access attempts are auditable.
+19. Retention follows documented/configurable policy per Step 19 SEC-022.
+20. Retention actions are controlled, traceable, and do not silently delete records.
+
+---
+
+# 15.7 Relationship With Other Requirements
+
+Step 15 shall support, not override, requirements established elsewhere.
+
+Where audit events involve authentication behavior, Step 4B remains the authoritative source for authentication requirements.
+
+Where audit events involve adherence behavior, Step 14B remains authoritative for adherence business logic.
+
+Where audit involves security controls, Step 19 remains authoritative for security implementation.
+
+Where audit involves retention policies, Step 19 SEC-022 provides the policy framework while Step 15 defines audit-specific retention requirements.
+
+Step 15 defines the audit logging requirements necessary to ensure accountability and traceability across all system functions.

@@ -477,3 +477,278 @@ There can still be a rare race condition—for example, two valid events arrive 
 **I strongly recommend this model for a production clinical system.**
 
 If you agree with this decision, I'll revise **Step 14 — Adherence Requirements** accordingly and lock it. Then we will move separately to **Step 15 — Audit Log Requirements**, exactly as you requested.
+
+
+---
+
+## Approved Adherence Requirements for Phase 1
+
+### Core Adherence Principles
+
+**ADH-PRINCIPLE-001 — One Reminder, One Adherence Decision**
+
+Each reminder occurrence SHALL have exactly one adherence decision.
+
+Multiple notification channels (Telegram, SMS, Voice) SHALL NOT create separate adherence records for the same reminder occurrence.
+
+The adherence decision is a property of the reminder, not of the individual notification channels.
+
+**ADH-PRINCIPLE-002 — Main Adherence States**
+
+The primary adherence outcomes SHALL be:
+- **PENDING**: Awaiting patient response
+- **TAKEN**: Patient explicitly indicated medication was taken
+- **NOT_TAKEN**: Patient explicitly indicated medication was not taken
+- **NO_RESPONSE**: Response window closed without valid accepted response
+
+These state names follow the repository's terminology and may be adjusted during implementation to match existing conventions, but the semantic distinctions SHALL be preserved.
+
+**ADH-PRINCIPLE-003 — CONFLICTING is Not an Adherence State**
+
+`CONFLICTING` SHALL be treated as an event or processing condition, NOT as a primary adherence state.
+
+If concurrent response events create a conflict:
+- The system SHALL preserve raw response events
+- The system SHALL detect the conflict
+- The system SHALL resolve deterministically using defined rules
+- The system SHALL NOT expose `CONFLICTING` as a normal adherence outcome to doctors
+
+**ADH-PRINCIPLE-004 — NO_RESPONSE is Distinct from NOT_TAKEN**
+
+`NO_RESPONSE` (the patient did not respond) SHALL be clinically and analytically distinguishable from `NOT_TAKEN` (the patient explicitly indicated they did not take the medication).
+
+These SHALL NOT be merged or treated as equivalent.
+
+### Channel Response Window Model
+
+**ADH-REQ-001 — One Active Response Channel**
+
+For each reminder occurrence, only one response channel SHALL be active at any given time.
+
+When escalation moves from one channel to another (e.g., Telegram → SMS → Voice), the previous channel's response window SHALL close.
+
+**ADH-REQ-002 — Closed Channels Cannot Change Adherence**
+
+Responses received through a closed channel SHALL be recorded as response events for audit/history purposes.
+
+Responses received through a closed channel SHALL NOT modify the reminder's adherence state.
+
+This is a critical safety invariant.
+
+**ADH-REQ-003 — Channel Window Closure**
+
+When the system transitions from one notification channel to the next during escalation, the previous channel's ability to accept adherence-changing responses SHALL be closed.
+
+Example: If Telegram window closes at T+10min and SMS begins, a Telegram response arriving at T+12min SHALL be recorded but SHALL NOT change adherence if SMS is the active channel.
+
+**ADH-REQ-004 — Response Event Preservation**
+
+ALL response events SHALL be preserved in the notification/response history, including:
+- Accepted responses (changed adherence)
+- Late responses (closed channel)
+- Unrecognized responses
+- Duplicate responses
+
+The doctor SHALL be able to view complete response history for audit and clinical review purposes.
+
+### Valid Response Recognition
+
+**ADH-REQ-005 — Telegram Valid Responses**
+
+Valid Telegram responses SHALL be:
+- **Taken** button/callback → `TAKEN`
+- **Not Taken** button/callback → `NOT_TAKEN`
+
+**ADH-REQ-006 — SMS Valid Responses**
+
+Valid SMS responses SHALL be:
+- **"1"** → `TAKEN`
+- **"2"** → `NOT_TAKEN`
+
+**ADH-REQ-007 — Voice Valid Responses**
+
+Valid Voice responses SHALL be:
+- **DTMF "1"** → `TAKEN`
+- **DTMF "2"** → `NOT_TAKEN`
+
+**ADH-REQ-008 — Unrecognized Responses Do Not Change Adherence**
+
+Unrecognized or invalid patient responses SHALL NOT automatically be interpreted as `TAKEN` or `NOT_TAKEN`.
+
+Examples of unrecognized responses:
+- SMS: "yes", "okay", "I took it", "hello", "3", arbitrary text
+- Telegram: Typed text instead of button press
+- Voice: DTMF other than 1 or 2, no DTMF
+
+Unrecognized responses SHALL be classified as `UNRECOGNIZED_RESPONSE` events and SHALL NOT change the reminder's adherence state.
+
+**ADH-REQ-009 — Unrecognized Response Handling**
+
+When an unrecognized response is received, the system MAY:
+- Send a clarification message (e.g., "Please reply 1 for Taken or 2 for Not Taken")
+- Record the event for audit purposes
+- Continue escalation according to policy (if response window is still open)
+
+Sending a clarification message SHALL NOT reset the escalation clock or extend the response window.
+
+**ADH-REQ-010 — NO_RESPONSE Generation**
+
+`NO_RESPONSE` SHALL be system-generated when the overall adherence response window closes without the system having received and accepted a valid patient response.
+
+`NO_RESPONSE` is NOT a patient-provided response; it is a system-determined final state.
+
+### Adherence vs Delivery Separation
+
+**ADH-REQ-011 — Delivery Does Not Equal Adherence (Cross-Channel)**
+
+The system SHALL maintain clear separation across all channels:
+- Telegram message delivered ≠ medication `TAKEN`
+- SMS message delivered ≠ medication `TAKEN`
+- Voice call answered ≠ medication `TAKEN`
+
+Only an explicit, valid, accepted patient response SHALL change adherence from `PENDING` to `TAKEN` or `NOT_TAKEN`.
+
+**ADH-REQ-012 — Provider Failure Does Not Equal NOT_TAKEN**
+
+Technical notification failures (Telegram unavailable, SMS provider down, Voice call failed) SHALL NOT automatically be converted to patient `NOT_TAKEN` adherence.
+
+Provider failure and patient adherence are separate concepts.
+
+The system SHALL distinguish technical failure from patient non-adherence.
+
+### Response Timing and Windows
+
+**ADH-REQ-013 — Adherence Response Window**
+
+Each reminder occurrence SHALL have an adherence response window defining how long the patient may respond.
+
+The adherence response window is separate from:
+- Notification escalation timing (when channels are attempted)
+- Individual channel response windows (when each channel can accept responses)
+
+**ADH-REQ-014 — Late Response Policy**
+
+Responses received after the adherence response window closes SHALL be validated against the reminder and notification state before processing.
+
+The system SHALL apply a defined late-response policy rather than blindly accepting late responses as current adherence.
+
+**ADH-REQ-015 — First Valid Response Establishes Initial Adherence**
+
+When a valid response is received through the currently active channel, it SHALL establish the reminder's adherence decision.
+
+Further escalation SHALL stop where applicable.
+
+Subsequent responses within the same window SHALL be handled according to response-correction policy.
+
+### Conflict Handling
+
+**ADH-REQ-016 — Deterministic Conflict Resolution**
+
+If two valid response events arrive nearly simultaneously around a channel transition (rare race condition), the system SHALL resolve the conflict deterministically using:
+- Reminder/channel state
+- Transaction/idempotency rules
+- Timestamp precedence
+- Defined business rules
+
+The system SHALL NOT require doctors to manually resolve normal concurrent-response scenarios.
+
+**ADH-REQ-017 — Raw Event Preservation During Conflicts**
+
+When conflicting response events occur, the system SHALL:
+- Preserve all raw response events
+- Detect the conflict
+- Resolve according to defined rules
+- Record the resolution decision
+- Make all events available for audit
+
+### Response vs Adherence Event Classification
+
+**ADH-REQ-018 — Patient-Generated Responses**
+
+Patient-generated responses that can establish adherence:
+- `TAKEN` (via Telegram Taken, SMS "1", Voice DTMF "1")
+- `NOT_TAKEN` (via Telegram Not Taken, SMS "2", Voice DTMF "2")
+
+**ADH-REQ-019 — System-Generated Adherence States**
+
+System-generated adherence determinations:
+- `NO_RESPONSE` (response window closed without valid accepted response)
+
+**ADH-REQ-020 — Response Event Metadata**
+
+Response event classifications that are NOT primary adherence outcomes:
+- `UNRECOGNIZED_RESPONSE` (invalid/unrecognized patient input)
+- `LATE_RESPONSE` (response received after window closed)
+- `CLOSED_CHANNEL_RESPONSE` (response received through closed channel)
+- `DUPLICATE_RESPONSE` (redundant response event)
+
+These are metadata/event types, not primary adherence states.
+
+### Doctor Visibility and UI
+
+**ADH-REQ-021 — One Adherence Result Per Reminder**
+
+The doctor's primary view SHALL show one adherence result per reminder occurrence.
+
+Example display:
+```
+8:00 AM — Amoxicillin 500mg
+Status: TAKEN
+Channel: SMS
+Response Time: 08:15
+```
+
+**ADH-REQ-022 — Detailed Response History Available**
+
+The doctor SHALL be able to access detailed notification and response history showing:
+- All notification attempts (Telegram, SMS, Voice)
+- All response events (accepted, rejected, late, unrecognized)
+- Channel transitions
+- Timestamps
+- Event types
+
+This enables clinical review and system troubleshooting.
+
+### Cross-Document Consistency
+
+**ADH-REQ-023 — Adherence Rules Consistent with Notification**
+
+Adherence requirements SHALL be consistent with:
+- Step 10: Notification orchestration and escalation (NOTIF-INVARIANT-001 through NOTIF-REQ-018)
+- Step 11: Telegram response handling (TEL-014 through TEL-024)
+- Step 12: SMS response handling (SMS-014 through SMS-021, SMS-033, SMS-034)
+- Step 13: Voice response handling (to be defined)
+
+**ADH-REQ-024 — Audit Integration**
+
+All adherence state changes and response events SHALL be available for audit logging as defined in Step 15 — Audit Log Requirements.
+
+Audit records SHALL support:
+- Adherence timeline reconstruction
+- Response event verification
+- Clinical record completeness
+- System behavior verification
+
+---
+
+## Requirement Ownership and Cross-References
+
+These adherence requirements depend on and reinforce:
+- **Step 9**: Reminder occurrence generation
+- **Step 10**: Notification orchestration, one active channel rule, delivery ≠ adherence
+- **Step 11**: Telegram response mechanism
+- **Step 12**: SMS response mechanism and one active SMS context
+- **Step 13**: Voice response mechanism
+- **Step 15**: Audit logging of adherence events
+- **Step 16**: Dashboard display of adherence outcomes
+- **Step 17**: Configuration of response windows (separate from escalation timing)
+
+---
+
+## Implementation Notes
+
+- Exact state names (PENDING, TAKEN, NOT_TAKEN, NO_RESPONSE) may be adapted during implementation to match existing repository conventions
+- The semantic distinctions between states MUST be preserved regardless of naming
+- Response window durations are configurable, not hard-coded
+- Conflict resolution algorithms are implementation details, but MUST be deterministic
+- All channel response mechanisms MUST follow the one-active-channel model
